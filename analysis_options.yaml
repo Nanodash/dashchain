@@ -1,0 +1,6 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # should await futures or mark them explicitly as unawaited
+    - unawaited_futures
