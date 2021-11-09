@@ -1,3 +1,3 @@
 ## 0.0.1
 
-- Initial version.
+- Initiate package by beginning to integrate Binance REST API.
