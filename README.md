@@ -1,2 +1,2 @@
 ## Dashchain
-A blockchain project.
+A Dart library to work with some crypto exchanges.

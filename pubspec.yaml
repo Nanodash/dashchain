@@ -1,15 +1,21 @@
 name: dashchain
-description: A blockchain project.
-version: 0.0.1
+description: A Dart library to work with some crypto exchanges.
+version: 0.1.0
 homepage: https://github.com/Nanodash/dashchain
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
 
 
-# dependencies:
-#   path: ^1.8.0
+dependencies:
+  http: ^0.13.3
+  freezed_annotation: ^0.15.0
+  json_annotation: ^4.3.0
+
 
 dev_dependencies:
   flutter_lints: ^1.0.4
   test: ^1.16.0
+  freezed: ^0.15.1+1
+  build_runner: ^2.1.5
+  json_serializable: ^6.0.1
