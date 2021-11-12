@@ -1,8 +1,9 @@
 import 'dart:convert';
 
+import 'package:dashchain/src/binance/binance_models/binance_models.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:dashchain/src/binance/constants.dart';
+import 'package:dashchain/src/binance/binance_constants.dart';
 
 /// Based on official docs at https://github.com/binance-exchange/binance-official-api-docs
 class BinanceRestApi {
@@ -72,14 +73,10 @@ class BinanceRestApi {
     _restartStopwatch();
     final response = await _apiClient.get(Uri.parse('$uri$pingPath'));
     _log('received answer after ${_stopwatch.elapsedMilliseconds}ms.');
-    switch (response.statusCode) {
-      case 200:
-        isApiAvailable = true;
-        break;
-      default:
-        _log('received error code ${response.statusCode}');
-        _log('reasonPhrase ${response.reasonPhrase}');
-        break;
+    _log('statusCode ${response.statusCode}');
+    _log('reasonPhrase ${response.reasonPhrase}');
+    if (response.statusCode == 200) {
+      isApiAvailable = true;
     }
     return isApiAvailable;
   }
@@ -95,16 +92,26 @@ class BinanceRestApi {
     _restartStopwatch();
     final response = await _apiClient.get(Uri.parse('$uri$timePath'));
     _log('received answer after ${_stopwatch.elapsedMilliseconds}ms.');
-    switch (response.statusCode) {
-      case 200:
-        final body = response.body;
-        serverTime = jsonDecode(body)['serverTime'];
-        break;
-      default:
-        _log('received error code ${response.statusCode}');
-        _log('reasonPhrase ${response.reasonPhrase}');
-        break;
+    _log('statusCode ${response.statusCode}');
+    _log('reasonPhrase ${response.reasonPhrase}');
+    if (response.statusCode == 200) {
+      final body = response.body;
+      serverTime = jsonDecode(body)['serverTime'];
     }
     return serverTime;
+  }
+
+  Future<ExchangeInfo?> exchangeInfo({String uri = baseEndpoint}) async {
+    _restartStopwatch();
+    final response = await _apiClient.get(Uri.parse('$uri$exchangeInfoPath'));
+    _log('received answer after ${_stopwatch.elapsedMilliseconds}ms.');
+    _log('statusCode ${response.statusCode}');
+    _log('reasonPhrase ${response.reasonPhrase}');
+    if (response.statusCode == 200) {
+      final body = response.body;
+      return ExchangeInfo.fromJson(jsonDecode(body));
+    } else {
+      return null;
+    }
   }
 }

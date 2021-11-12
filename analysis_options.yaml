@@ -4,3 +4,9 @@ linter:
   rules:
     # should await futures or mark them explicitly as unawaited
     - unawaited_futures
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    invalid_annotation_target: ignore

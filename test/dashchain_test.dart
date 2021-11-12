@@ -1,5 +1,6 @@
-import 'package:dashchain/src/binance/binance_rest_api.dart';
-import 'package:dashchain/src/binance/constants.dart';
+import 'dart:convert';
+
+import 'package:dashchain/dashchain.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
@@ -30,6 +31,14 @@ void main() {
       (Request request) => Future.value(
         Response(
           '{"serverTime": ${DateTime.now().millisecondsSinceEpoch}}',
+          200,
+        ),
+      ),
+    );
+    late final MockClient exchangeInfoOkClient = MockClient(
+      (Request request) => Future.value(
+        Response(
+          jsonEncode(ExchangeInfo('test', -1, [], [], []).toJson()),
           200,
         ),
       ),
@@ -104,6 +113,20 @@ void main() {
         final time = await _api.checkApiTime();
         expect(time, isNegative);
         expect(time, equals(-1));
+      });
+    });
+    group('exchangeInfo tests', () {
+      test('OK exchangeInfo should return ExchangeInfo object', () async {
+        _api.dispose();
+        _api.apiClient = exchangeInfoOkClient;
+        final exchangeInfo = await _api.exchangeInfo();
+        expect(exchangeInfo, isA<ExchangeInfo>());
+      });
+      test('KO exchangeInfo should return null', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        final exchangeInfo = await _api.exchangeInfo();
+        expect(exchangeInfo, isNull);
       });
     });
   });
