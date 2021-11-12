@@ -27,6 +27,7 @@ void main() {
       if (!request.url.host.contains('api3')) statusCode = 400;
       return Future.value(Response('okClientApi3', statusCode));
     });
+    // client duplicating /time answer
     late final MockClient timeOkClient = MockClient(
       (Request request) => Future.value(
         Response(
@@ -35,6 +36,7 @@ void main() {
         ),
       ),
     );
+    // client duplicating /exchangeInfo answer
     late final MockClient exchangeInfoOkClient = MockClient(
       (Request request) => Future.value(
         Response(

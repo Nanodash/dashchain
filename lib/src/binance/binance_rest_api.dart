@@ -101,6 +101,11 @@ class BinanceRestApi {
     return serverTime;
   }
 
+  /// Will check for Binance's listed symbols.
+  ///
+  /// Returns :
+  /// -  an ExchangeInfo object containing all returned data
+  /// - null otherwise
   Future<ExchangeInfo?> exchangeInfo({String uri = baseEndpoint}) async {
     _restartStopwatch();
     final response = await _apiClient.get(Uri.parse('$uri$exchangeInfoPath'));
