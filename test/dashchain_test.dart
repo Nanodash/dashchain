@@ -74,7 +74,7 @@ void main() {
         ),
       ),
     );
-    // client duplicating /trades answer
+    // clients duplicating /trades answer
     late final MockClient tradesOkClient = MockClient(
       (Request request) => Future.value(
         Response(
@@ -89,6 +89,15 @@ void main() {
               "isBestMatch": true
             }
           ]),
+          200,
+          reasonPhrase: 'tradesOkClient',
+        ),
+      ),
+    );
+    late final MockClient tradesKoClient = MockClient(
+      (Request request) => Future.value(
+        Response(
+          jsonEncode({"id": 28457}),
           200,
           reasonPhrase: 'tradesOkClient',
         ),
@@ -207,13 +216,23 @@ void main() {
       });
     });
     group('trades tests', () {
-      test('OK trade should return BinanceTrade object', () async {
+      test('OK trades should return BinanceTrade object', () async {
         _api.dispose();
         _api.apiClient = tradesOkClient;
         final exchangeInfo = await _api.trades(symbol: 'BNBETH');
         expect(exchangeInfo, isA<List<BinanceTrade>>());
       });
-      test('KO exchangeInfo should throw', () async {
+      test('KO trades should throw', () async {
+        _api.dispose();
+        _api.apiClient = tradesKoClient;
+        try {
+          await _api.trades(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('KO trades should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
         try {
