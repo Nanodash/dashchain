@@ -201,4 +201,25 @@ class BinanceRestApi {
         orderBookPath,
         queryParameters: {'symbol': symbol, 'limit': '$limit'},
       ));
+
+  Future<List<BinanceTrade>> trades({
+    String baseUri = defaultUri,
+    required String symbol,
+    int limit = 500,
+  }) async {
+    final trades = await _sendRequest(
+      baseUri,
+      '/trades',
+      queryParameters: {'symbol': symbol, 'limit': '$limit'},
+    );
+    if (trades is List) {
+      final _trades = <BinanceTrade>[];
+      for (final trade in trades) {
+        _trades.add(BinanceTrade.fromJson(trade));
+      }
+      return _trades;
+    } else {
+      throw const BinanceApiError(-1, 'unexpected trades format');
+    }
+  }
 }
