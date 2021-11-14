@@ -4,13 +4,13 @@ part 'order_book.freezed.dart';
 part 'order_book.g.dart';
 
 @freezed
-class OrderBook with _$OrderBook {
-  factory OrderBook(
+class BinanceOrderBook with _$BinanceOrderBook {
+  factory BinanceOrderBook(
     int lastUpdateId,
     List<List<String>> bids,
     List<List<String>> asks,
-  ) = _OrderBook;
+  ) = _BinanceOrderBook;
 
-  factory OrderBook.fromJson(Map<String, dynamic> json) =>
-      _$OrderBookFromJson(json);
+  factory BinanceOrderBook.fromJson(Map<String, dynamic> json) =>
+      _$BinanceOrderBookFromJson(json);
 }
