@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'binance_symbol.freezed.dart';
-part 'binance_symbol.g.dart';
+part 'symbol.freezed.dart';
+part 'symbol.g.dart';
 
 @freezed
 class BinanceSymbol with _$BinanceSymbol {

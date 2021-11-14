@@ -1,9 +1,10 @@
 /// A Dart library to work with some crypto exchanges.
+///
+/// Get latest cryptomarket quotes, check order books, write back tests, manage your assets !
 library dashchain;
 
-export 'src/binance/binance_rest_api.dart';
-export 'src/binance/binance_constants.dart';
-export 'src/binance/binance_enums.dart';
-export 'src/binance/binance_api_errors/binance_api_errors.dart';
-export 'src/binance/binance_models/binance_models.dart';
-export 'src/common/constants.dart';
+export 'src/binance/rest_api.dart';
+export 'src/binance/constants.dart';
+export 'src/binance/enums.dart';
+export 'src/binance/api_errors/api_error.dart';
+export 'src/binance/models/models.dart';

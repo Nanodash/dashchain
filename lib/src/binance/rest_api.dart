@@ -1,10 +1,8 @@
 import 'dart:convert';
 
-import 'package:dashchain/dashchain.dart';
-import 'package:dashchain/src/binance/binance_models/binance_models.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:dashchain/src/binance/binance_constants.dart';
+import 'package:dashchain/dashchain.dart';
 
 /// Based on official docs at https://github.com/binance-exchange/binance-official-api-docs
 class BinanceRestApi {
@@ -62,7 +60,7 @@ class BinanceRestApi {
     final response = await _apiClient.get(uri);
     _log('received answer after ${_stopwatch.elapsedMilliseconds}ms.');
     switch (response.statusCode) {
-      case okHttpCode:
+      case 200:
         _maybeUpdateUsedWeight(response.headers);
         try {
           return jsonDecode(response.body);
@@ -137,7 +135,7 @@ class BinanceRestApi {
 
   /// Will check for Binance's _REST API_ server time using `/time` endpoint.
   ///
-  /// Returns _Epoch time_ in milliseconds when request is a success.
+  /// Returns the _Epoch time_ in milliseconds when request is a success.
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   Future<int> checkApiTime({String baseUri = defaultUri}) async =>
@@ -146,14 +144,14 @@ class BinanceRestApi {
   /// Will check by default for all Binance's listed symbols using `/exchangeInfo` endpoint.
   /// If [symbols] is provided, will append query parameter to the GET request in order to filter the result.
   ///
-  /// Returns an [ExchangeInfo] containing all returned data when request is a success.
+  /// Returns a [BinanceExchangeInfo] containing all returned data when request is a success.
   ///
   /// Throws a [BinanceApiError] if an error occurs.
-  Future<ExchangeInfo> exchangeInfo({
+  Future<BinanceExchangeInfo> exchangeInfo({
     String baseUri = defaultUri,
     List<String> symbols = const <String>[],
   }) async =>
-      ExchangeInfo.fromJson(await _sendRequest(
+      BinanceExchangeInfo.fromJson(await _sendRequest(
         baseUri,
         exchangeInfoPath,
         queryParameters: _buildExchangeInfoParams(symbols),
@@ -190,15 +188,15 @@ class BinanceRestApi {
 
   /// Will check for a specific symbol's order book using `/depth` endpoint.
   ///
-  /// Returns an [OrderBook] containing all returned data when request is a success.
+  /// Returns an [BinanceOrderBook] containing all returned data when request is a success.
   ///
   /// Throws a [BinanceApiError] if an error occurs.
-  Future<OrderBook> orderBook({
+  Future<BinanceOrderBook> orderBook({
     String baseUri = defaultUri,
     required String symbol,
     int limit = 100,
   }) async =>
-      OrderBook.fromJson(await _sendRequest(
+      BinanceOrderBook.fromJson(await _sendRequest(
         baseUri,
         orderBookPath,
         queryParameters: {'symbol': symbol, 'limit': '$limit'},

@@ -4,14 +4,14 @@ part 'rate_limiter.freezed.dart';
 part 'rate_limiter.g.dart';
 
 @freezed
-class RateLimiter with _$RateLimiter {
-  factory RateLimiter(
+class BinanceRateLimiter with _$BinanceRateLimiter {
+  factory BinanceRateLimiter(
     String rateLimitType,
     String interval,
     int intervalNum,
     int limit,
-  ) = _RateLimiter;
+  ) = _BinanceRateLimiter;
 
-  factory RateLimiter.fromJson(Map<String, dynamic> json) =>
-      _$RateLimiterFromJson(json);
+  factory BinanceRateLimiter.fromJson(Map<String, dynamic> json) =>
+      _$BinanceRateLimiterFromJson(json);
 }
