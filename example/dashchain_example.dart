@@ -38,11 +38,11 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
       info.symbols.where((s) => s.status == '${TradingStatus.trading}');
   print('found ${info.symbols.length} listed symbols of which '
       '${tradeableSymbols.length} are available for trade !');
-  if (tradeableSymbols.any((s) => s.quoteAsset == eth)) {
+  if (tradeableSymbols.any((s) => s.quoteAsset == 'ETH')) {
     List<String> xEthSymbols = List<String>.from(tradeableSymbols
-        .where((s) => s.quoteAsset == eth)
+        .where((s) => s.quoteAsset == 'ETH')
         .map((s) => s.symbol));
-    print('found ${xEthSymbols.length} symbols with $eth as quote asset !');
+    print('found ${xEthSymbols.length} symbols with ETH as quote asset !');
     if (xEthSymbols.isNotEmpty) {
       final firstFive = List<String>.from(xEthSymbols.take(5));
       print('will look for only first 5 symbols ($firstFive})');

@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-import 'package:dashchain/dashchain.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
+
+import 'package:dashchain/dashchain.dart';
 
 // ignore_for_file: avoid_print
 void main() {
@@ -57,7 +58,7 @@ void main() {
     late final MockClient exchangeInfoOkClient = MockClient(
       (Request request) => Future.value(
         Response(
-          jsonEncode(ExchangeInfo('test', -1, [], [], []).toJson()),
+          jsonEncode(BinanceExchangeInfo('test', -1, [], [], []).toJson()),
           200,
           reasonPhrase: 'exchangeInfoOkClient',
         ),
@@ -67,7 +68,7 @@ void main() {
     late final MockClient orderBookOkClient = MockClient(
       (Request request) => Future.value(
         Response(
-          jsonEncode(OrderBook(-1, [], []).toJson()),
+          jsonEncode(BinanceOrderBook(-1, [], []).toJson()),
           200,
           reasonPhrase: 'orderBookOkClient',
         ),
@@ -149,11 +150,12 @@ void main() {
       });
     });
     group('exchangeInfo tests', () {
-      test('OK exchangeInfo should return ExchangeInfo object', () async {
+      test('OK exchangeInfo should return BinanceExchangeInfo object',
+          () async {
         _api.dispose();
         _api.apiClient = exchangeInfoOkClient;
         final exchangeInfo = await _api.exchangeInfo();
-        expect(exchangeInfo, isA<ExchangeInfo>());
+        expect(exchangeInfo, isA<BinanceExchangeInfo>());
       });
       test('KO exchangeInfo should throw', () async {
         _api.dispose();
@@ -167,11 +169,11 @@ void main() {
       });
     });
     group('orderBook tests', () {
-      test('OK orderBook should return OrderBook object', () async {
+      test('OK orderBook should return BinanceOrderBook object', () async {
         _api.dispose();
         _api.apiClient = orderBookOkClient;
         final exchangeInfo = await _api.orderBook(symbol: 'BNBETH');
-        expect(exchangeInfo, isA<OrderBook>());
+        expect(exchangeInfo, isA<BinanceOrderBook>());
       });
       test('KO exchangeInfo should throw', () async {
         _api.dispose();
