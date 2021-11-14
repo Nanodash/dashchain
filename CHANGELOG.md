@@ -1,3 +1,7 @@
+## 0.3.0
+
+- integrate `/trades` endpoint
+
 ## 0.2.1
 
 - update package description + fix dart format so we have the last points for pub.dev score

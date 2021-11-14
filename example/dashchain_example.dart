@@ -35,7 +35,7 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
   print('will check for exchange symbols to trade...');
   final info = await api.exchangeInfo(baseUri: endpointUri);
   final tradeableSymbols =
-      info.symbols.where((s) => s.status == '${TradingStatus.trading}');
+      info.symbols.where((s) => s.status == '${BinanceTradingStatus.trading}');
   print('found ${info.symbols.length} listed symbols of which '
       '${tradeableSymbols.length} are available for trade !');
   if (tradeableSymbols.any((s) => s.quoteAsset == 'ETH')) {
@@ -51,9 +51,18 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
         symbols: firstFive,
       );
       print(ethExchangeInfo);
-      print('get orderbook depth for ${firstFive.first}');
-      final orderBook = await api.orderBook(symbol: firstFive.first);
-      print(orderBook);
+      final firstEthPair = firstFive.first;
+      print('get orderbook depth for $firstEthPair');
+      final orderBookDepth50 = await api.orderBook(
+        symbol: firstEthPair,
+        limit: 50,
+      );
+      print(orderBookDepth50);
+      final tenLastTrades = await api.trades(
+        symbol: firstEthPair,
+        limit: 10,
+      );
+      print(tenLastTrades);
     }
   }
 }

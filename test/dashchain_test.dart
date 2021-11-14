@@ -74,6 +74,35 @@ void main() {
         ),
       ),
     );
+    // clients duplicating /trades answer
+    late final MockClient tradesOkClient = MockClient(
+      (Request request) => Future.value(
+        Response(
+          jsonEncode([
+            {
+              "id": 28457,
+              "price": "4.00000100",
+              "qty": "12.00000000",
+              "quoteQty": "48.000012",
+              "time": 1499865549590,
+              "isBuyerMaker": true,
+              "isBestMatch": true
+            }
+          ]),
+          200,
+          reasonPhrase: 'tradesOkClient',
+        ),
+      ),
+    );
+    late final MockClient tradesKoClient = MockClient(
+      (Request request) => Future.value(
+        Response(
+          jsonEncode({"id": 28457}),
+          200,
+          reasonPhrase: 'tradesOkClient',
+        ),
+      ),
+    );
 
     setUpAll(() {
       _api = BinanceRestApi();
@@ -180,6 +209,34 @@ void main() {
         _api.apiClient = koClient;
         try {
           await _api.orderBook(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
+    group('trades tests', () {
+      test('OK trades should return BinanceTrade object', () async {
+        _api.dispose();
+        _api.apiClient = tradesOkClient;
+        final exchangeInfo = await _api.trades(symbol: 'BNBETH');
+        expect(exchangeInfo, isA<List<BinanceTrade>>());
+      });
+      test('KO trades should throw', () async {
+        _api.dispose();
+        _api.apiClient = tradesKoClient;
+        try {
+          await _api.trades(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('KO trades should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.trades(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           expect(e, isA<BinanceApiError>());

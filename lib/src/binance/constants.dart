@@ -23,5 +23,9 @@ const String exchangeInfoPath = '/exchangeInfo';
 // -----------------------------------
 
 // ------ MARKET DATA ENDPOINTS ------
+/// The endpoint to get the Order Book for a specific symbol
 const String orderBookPath = '/depth';
+
+/// The endpoint to get the latest trades for a specific symbol
+const String tradesPath = '/trades';
 // -----------------------------------
