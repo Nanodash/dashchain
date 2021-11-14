@@ -1,6 +1,6 @@
 name: dashchain
-description: A Dart library to work with some crypto exchanges.
-version: 0.2.0
+description: A Dart library to work with some crypto exchanges. Get latest cryptomarket quotes, check order books, write back tests, manage your assets !
+version: 0.2.1
 homepage: https://github.com/Nanodash/dashchain
 
 environment:
