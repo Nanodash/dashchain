@@ -133,7 +133,7 @@ class BinanceRestApi {
     }
   }
 
-  /// Will check for Binance's _REST API_ server time using `/time` endpoint.
+  /// Will get Binance's _REST API_ server time using `/time` endpoint.
   ///
   /// Returns the _Epoch time_ in milliseconds when request is a success.
   ///
@@ -141,7 +141,7 @@ class BinanceRestApi {
   Future<int> checkApiTime({String baseUri = defaultUri}) async =>
       (await _sendRequest(baseUri, timePath))['serverTime'];
 
-  /// Will check by default for all Binance's listed symbols using `/exchangeInfo` endpoint.
+  /// Will get by default all Binance's listed symbols using `/exchangeInfo` endpoint.
   /// If [symbols] is provided, will append query parameter to the GET request in order to filter the result.
   ///
   /// Returns a [BinanceExchangeInfo] containing all returned data when request is a success.
@@ -186,7 +186,7 @@ class BinanceRestApi {
     return params;
   }
 
-  /// Will check for a specific symbol's order book using `/depth` endpoint.
+  /// Will get a specific symbol's order book using `/depth` endpoint.
   ///
   /// Returns an [BinanceOrderBook] containing all returned data when request is a success.
   ///
@@ -202,14 +202,19 @@ class BinanceRestApi {
         queryParameters: {'symbol': symbol, 'limit': '$limit'},
       ));
 
+  /// Will get a specific symbol's latests trades using `/trades` endpoint.
+  ///
+  /// Returns a list of [BinanceTrade] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
   Future<List<BinanceTrade>> trades({
     String baseUri = defaultUri,
     required String symbol,
-    int limit = 500,
+    int limit = 100,
   }) async {
     final trades = await _sendRequest(
       baseUri,
-      '/trades',
+      tradesPath,
       queryParameters: {'symbol': symbol, 'limit': '$limit'},
     );
     if (trades is List) {
