@@ -243,5 +243,35 @@ void main() {
         }
       });
     });
+
+    group('historicalTrades tests', () {
+      test('OK historicalTrades should return BinanceTrade object', () async {
+        _api.dispose();
+        _api.apiClient = tradesOkClient;
+        final exchangeInfo =
+            await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+        expect(exchangeInfo, isA<List<BinanceTrade>>());
+      });
+      test('KO historicalTrades should throw', () async {
+        _api.dispose();
+        _api.apiClient = tradesKoClient;
+        try {
+          await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('KO historicalTrades should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
   });
 }
