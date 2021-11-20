@@ -48,6 +48,7 @@ class BinanceRestApi {
   Future<dynamic> _sendRequest(
     String baseUri,
     String resourcePath, {
+    Map<String, String>? headers,
     Map<String, String>? queryParameters,
   }) async {
     final uri = Uri.https(
@@ -57,7 +58,7 @@ class BinanceRestApi {
     );
     _log('GET $uri');
     _restartStopwatch();
-    final response = await _apiClient.get(uri);
+    final response = await _apiClient.get(uri, headers: headers);
     _log('received answer after ${_stopwatch.elapsedMilliseconds}ms.');
     switch (response.statusCode) {
       case 200:
@@ -80,7 +81,7 @@ class BinanceRestApi {
   /// Will check response's headers to update the current requests quota.
   void _maybeUpdateUsedWeight(Map<String, String> headers) {
     if (headers.containsKey(xMbxUsedWeightHeader)) {
-      final weightAsString = headers['x-mbx-used-weight']!;
+      final weightAsString = headers[xMbxUsedWeightHeader]!;
       try {
         _kUsedWeight = int.parse(weightAsString);
         _log('updated used weight : $_kUsedWeight');
@@ -118,6 +119,10 @@ class BinanceRestApi {
 
   /// Will check for Binance's _REST API_ availability using `/ping` endpoint as recommended.
   ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1
+  ///
   /// Returns :
   /// - `true` when request is a success
   /// - `false` otherwise
@@ -135,6 +140,10 @@ class BinanceRestApi {
 
   /// Will get Binance's _REST API_ server time using `/time` endpoint.
   ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1
+  ///
   /// Returns the _Epoch time_ in milliseconds when request is a success.
   ///
   /// Throws a [BinanceApiError] if an error occurs.
@@ -143,6 +152,10 @@ class BinanceRestApi {
 
   /// Will get by default all Binance's listed symbols using `/exchangeInfo` endpoint.
   /// If [symbols] is provided, will append query parameter to the GET request in order to filter the result.
+  ///
+  /// API Key required : no
+  ///
+  /// Query weight : 10
   ///
   /// Returns a [BinanceExchangeInfo] containing all returned data when request is a success.
   ///
@@ -187,8 +200,21 @@ class BinanceRestApi {
   }
 
   /// Will get a specific symbol's order book using `/depth` endpoint.
+  /// If [limit] is provided, will modify the max number of bids/asks returned and the query weight. (defaults to 100)
   ///
-  /// Returns an [BinanceOrderBook] containing all returned data when request is a success.
+  /// API Key required : no
+  ///
+  /// Valid limit values and associated query weight :
+  ///
+  /// |        Limit       |  Weight |
+  /// | :----------------: | :------ |
+  /// | 5, 10, 20, 50, 100 |    1    |
+  /// |        500         |    5    |
+  /// |        1000        |    10   |
+  /// |        5000        |    50   |
+  ///
+  ///
+  /// Returns a [BinanceOrderBook] containing all returned data when request is a success.
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   Future<BinanceOrderBook> orderBook({
@@ -203,6 +229,11 @@ class BinanceRestApi {
       ));
 
   /// Will get a specific symbol's latests trades using `/trades` endpoint.
+  /// If [limit] is provided, will modify the max number of trades returned. (defaults to 100)
+  ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1
   ///
   /// Returns a list of [BinanceTrade] containing all returned data when request is a success.
   ///
@@ -223,6 +254,42 @@ class BinanceRestApi {
         _trades.add(BinanceTrade.fromJson(trade));
       }
       return _trades;
+    } else {
+      throw const BinanceApiError(-1, 'unexpected trades format');
+    }
+  }
+
+  /// Will get a specific symbol's historical trades using `/historicalTrades` endpoint.
+  /// If [limit] is provided, will modify the max number of trades returned. (defaults to 100)
+  ///
+  /// API Key required : yes
+  ///
+  /// Query weight : 5
+  ///
+  /// Returns a list of [BinanceTrade] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  Future<List<BinanceTrade>> historicalTrades({
+    String baseUri = defaultUri,
+    required String symbol,
+    required String apiKey,
+    int limit = 100,
+    int? fromId,
+  }) async {
+    Map<String, String> params = {'symbol': symbol, 'limit': '$limit'};
+    if (fromId != null) {
+      params['fromId'] = '$fromId';
+    }
+    final historicalTrades = await _sendRequest(
+      baseUri,
+      historicalTradesPath,
+      headers: {xMbxApiKeyHeader: apiKey},
+      queryParameters: params,
+    );
+    if (historicalTrades is List) {
+      return List<BinanceTrade>.from(
+        historicalTrades.map((t) => BinanceTrade.fromJson(t)),
+      );
     } else {
       throw const BinanceApiError(-1, 'unexpected trades format');
     }
