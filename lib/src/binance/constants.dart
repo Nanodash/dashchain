@@ -1,7 +1,7 @@
 /// Binance's base domain name.
 const String binanceDomain = 'binance.com';
 
-/// The default URI to use when interacting with Binance Rest API.
+/// The default URI to use when interacting with Binance's _REST API_.
 const String defaultUri = 'api.$binanceDomain';
 
 /// The base path for Binance's _REST API_.

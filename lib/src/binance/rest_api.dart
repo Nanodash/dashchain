@@ -27,7 +27,8 @@ class BinanceRestApi {
   /// This variable will track the current IP used weight, that _- if high enough -_ may mean that too many requests has been done.
   ///
   /// Because it can lead to IP ban, we have to be careful with this.
-  int _kUsedWeight = 0;
+  int get usedWeight => _usedWeight;
+  int _usedWeight = 0;
 
   /// A [Stopwatch] to log requests duration (may remove before production use, or have an opt-in toggle)
   static late final Stopwatch _stopwatch = Stopwatch();
@@ -83,8 +84,8 @@ class BinanceRestApi {
     if (headers.containsKey(xMbxUsedWeightHeader)) {
       final weightAsString = headers[xMbxUsedWeightHeader]!;
       try {
-        _kUsedWeight = int.parse(weightAsString);
-        _log('updated used weight : $_kUsedWeight');
+        _usedWeight = int.parse(weightAsString);
+        _log('updated used weight : $_usedWeight');
       } catch (e) {
         _log('unexpected format for weight $weightAsString');
       }
