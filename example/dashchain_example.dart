@@ -35,7 +35,7 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
   print('will check for exchange symbols to trade...');
   final info = await api.exchangeInfo(baseUri: endpointUri);
   final tradeableSymbols =
-      info.symbols.where((s) => s.status == '${BinanceTradingStatus.trading}');
+      info.symbols.where((s) => s.status == BinanceTradingStatus.trading.value);
   print('found ${info.symbols.length} listed symbols of which '
       '${tradeableSymbols.length} are available for trade !');
   if (tradeableSymbols.any((s) => s.quoteAsset == 'ETH')) {
