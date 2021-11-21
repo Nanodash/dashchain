@@ -35,7 +35,7 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
   print('will check for exchange symbols to trade...');
   final info = await api.exchangeInfo(baseUri: endpointUri);
   final tradeableSymbols =
-      info.symbols.where((s) => s.status == '${BinanceTradingStatus.trading}');
+      info.symbols.where((s) => s.status == BinanceTradingStatus.trading.value);
   print('found ${info.symbols.length} listed symbols of which '
       '${tradeableSymbols.length} are available for trade !');
   if (tradeableSymbols.any((s) => s.quoteAsset == 'ETH')) {
@@ -76,6 +76,14 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
           fromId: lastId,
         );
         print(historicalTrade);
+        final aggTrades = await api.aggregatedTrades(
+          baseUri: endpointUri,
+          symbol: bnbEthPair,
+          startTime:
+              DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
+          endtime: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+        print(aggTrades);
       }
     }
   }

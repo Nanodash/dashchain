@@ -58,7 +58,7 @@ void main() {
     late final MockClient exchangeInfoOkClient = MockClient(
       (Request request) => Future.value(
         Response(
-          jsonEncode(BinanceExchangeInfo('test', -1, [], [], []).toJson()),
+          jsonEncode(BinanceExchangeInfo('test', -1, [], [], [])),
           200,
           reasonPhrase: 'exchangeInfoOkClient',
         ),
@@ -68,7 +68,7 @@ void main() {
     late final MockClient orderBookOkClient = MockClient(
       (Request request) => Future.value(
         Response(
-          jsonEncode(BinanceOrderBook(-1, [], []).toJson()),
+          jsonEncode(BinanceOrderBook(-1, [], [])),
           200,
           reasonPhrase: 'orderBookOkClient',
         ),
@@ -79,27 +79,48 @@ void main() {
       (Request request) => Future.value(
         Response(
           jsonEncode([
-            {
-              "id": 28457,
-              "price": "4.00000100",
-              "qty": "12.00000000",
-              "quoteQty": "48.000012",
-              "time": 1499865549590,
-              "isBuyerMaker": true,
-              "isBestMatch": true
-            }
+            BinanceTrade(
+              28457,
+              '4.00000100',
+              '12.00000000',
+              '48.000012',
+              1499865549590,
+              true,
+              true,
+            )
           ]),
           200,
           reasonPhrase: 'tradesOkClient',
         ),
       ),
     );
-    late final MockClient tradesKoClient = MockClient(
+    // clients duplicating /aggTrades answer
+    late final MockClient aggTradesOkClient = MockClient(
+      (Request request) => Future.value(
+        Response(
+          jsonEncode([
+            BinanceAggregatedTrade(
+              26129,
+              '0.01633102',
+              '4.70443515',
+              27781,
+              27781,
+              1498793709153,
+              true,
+              true,
+            )
+          ]),
+          200,
+          reasonPhrase: 'aggTradesOkClient',
+        ),
+      ),
+    );
+    late final MockClient notAListClient = MockClient(
       (Request request) => Future.value(
         Response(
           jsonEncode({"id": 28457}),
           200,
-          reasonPhrase: 'tradesOkClient',
+          reasonPhrase: 'notAListClient',
         ),
       ),
     );
@@ -201,10 +222,10 @@ void main() {
       test('OK orderBook should return BinanceOrderBook object', () async {
         _api.dispose();
         _api.apiClient = orderBookOkClient;
-        final exchangeInfo = await _api.orderBook(symbol: 'BNBETH');
-        expect(exchangeInfo, isA<BinanceOrderBook>());
+        final orderBook = await _api.orderBook(symbol: 'BNBETH');
+        expect(orderBook, isA<BinanceOrderBook>());
       });
-      test('KO exchangeInfo should throw', () async {
+      test('KO orderBook should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
         try {
@@ -219,12 +240,12 @@ void main() {
       test('OK trades should return BinanceTrade object', () async {
         _api.dispose();
         _api.apiClient = tradesOkClient;
-        final exchangeInfo = await _api.trades(symbol: 'BNBETH');
-        expect(exchangeInfo, isA<List<BinanceTrade>>());
+        final trades = await _api.trades(symbol: 'BNBETH');
+        expect(trades, isA<List<BinanceTrade>>());
       });
-      test('KO trades should throw', () async {
+      test('bad format trades should throw', () async {
         _api.dispose();
-        _api.apiClient = tradesKoClient;
+        _api.apiClient = notAListClient;
         try {
           await _api.trades(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
@@ -243,18 +264,17 @@ void main() {
         }
       });
     });
-
     group('historicalTrades tests', () {
       test('OK historicalTrades should return BinanceTrade object', () async {
         _api.dispose();
         _api.apiClient = tradesOkClient;
-        final exchangeInfo =
+        final historicalTrades =
             await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
-        expect(exchangeInfo, isA<List<BinanceTrade>>());
+        expect(historicalTrades, isA<List<BinanceTrade>>());
       });
-      test('KO historicalTrades should throw', () async {
+      test('bad format historicalTrades should throw', () async {
         _api.dispose();
-        _api.apiClient = tradesKoClient;
+        _api.apiClient = notAListClient;
         try {
           await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
           fail('should have thrown a BinanceApiError');
@@ -267,6 +287,63 @@ void main() {
         _api.apiClient = koClient;
         try {
           await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
+    group('aggTrades tests', () {
+      test('OK aggTrades should return Map object', () async {
+        _api.dispose();
+        _api.apiClient = aggTradesOkClient;
+        final aggTrades = await _api.aggregatedTrades(symbol: 'BNBETH');
+        expect(aggTrades, isA<List<BinanceAggregatedTrade>>());
+      });
+      test(
+          'aggTrades with less than 1h between start and end time should throw',
+          () async {
+        _api.dispose();
+        _api.apiClient = aggTradesOkClient;
+        final midnight = DateTime(2021, 11, 21, 0);
+        final midnightPlusHalfHour = DateTime(2021, 11, 21, 0, 30);
+        final midnightPlusHour = DateTime(2021, 11, 21, 1);
+        try {
+          await _api.aggregatedTrades(
+            symbol: 'BNBETH',
+            startTime: midnight,
+            endtime: midnightPlusHour,
+          );
+          fail('should have thrown an ArgumentError');
+        } catch (e) {
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          final aggTrades = await _api.aggregatedTrades(
+            symbol: 'BNBETH',
+            startTime: midnight,
+            endtime: midnightPlusHalfHour,
+          );
+          expect(aggTrades, isA<List<BinanceAggregatedTrade>>());
+        } catch (e) {
+          fail('should not have thrown an Exception');
+        }
+      });
+      test('bad format aggTrades should throw', () async {
+        _api.dispose();
+        _api.apiClient = notAListClient;
+        try {
+          await _api.aggregatedTrades(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('KO aggTrades should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.aggregatedTrades(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           expect(e, isA<BinanceApiError>());

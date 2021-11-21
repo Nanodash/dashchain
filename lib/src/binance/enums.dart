@@ -1,35 +1,44 @@
 /// The enum for the possible values of a symbol trading status in Binance API
-class BinanceTradingStatus {
-  final String _tradingStatus;
-
-  const BinanceTradingStatus._(this._tradingStatus);
-
+enum BinanceTradingStatus {
   /// When the symbol is available for trading
-  static const BinanceTradingStatus trading = BinanceTradingStatus._('TRADING');
+  trading,
 
   /// When the symbol is in pre-trading phase (eg. about to be officially listed)
-  static const BinanceTradingStatus preTrading =
-      BinanceTradingStatus._('PRE_TRADING');
+  preTrading,
 
   /// When the symbol is in post-trading phase (eg. about to be officially delisted)
-  static const BinanceTradingStatus postTrading =
-      BinanceTradingStatus._('POST_TRADING');
+  postTrading,
 
   /// When the symbol is unavailable for trading (users may still cancel orders)
-  static const BinanceTradingStatus endOfDay =
-      BinanceTradingStatus._('END_OF_DAY');
+  endOfDay,
 
   /// When the symbol is unavailable for trading due to some emergency situations (users may still cancel orders)
-  static const BinanceTradingStatus halt = BinanceTradingStatus._('HALT');
+  halt,
 
   /// When the symbol is unavailable for trading because symbol is delisted or during expected downtime (users may still cancel orders)
-  static const BinanceTradingStatus breakStatus =
-      BinanceTradingStatus._('BREAK');
+  breakStatus,
 
   /// Did not find any explanation
-  static const BinanceTradingStatus auctionMatch =
-      BinanceTradingStatus._('AUCTION_MATCH');
+  auctionMatch,
+}
 
-  @override
-  String toString() => _tradingStatus;
+extension BinanceTradingStatusAsString on BinanceTradingStatus {
+  String get value {
+    switch (this) {
+      case BinanceTradingStatus.trading:
+        return 'TRADING';
+      case BinanceTradingStatus.preTrading:
+        return 'PRE_TRADING';
+      case BinanceTradingStatus.postTrading:
+        return 'POST_TRADING';
+      case BinanceTradingStatus.endOfDay:
+        return 'END_OF_DAY';
+      case BinanceTradingStatus.halt:
+        return 'HALT';
+      case BinanceTradingStatus.breakStatus:
+        return 'BREAK';
+      case BinanceTradingStatus.auctionMatch:
+        return 'AUCTION_MATCH';
+    }
+  }
 }

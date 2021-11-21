@@ -34,4 +34,7 @@ const String tradesPath = '/trades';
 
 /// The endpoint to get the historical trades for a specific symbol.
 const String historicalTradesPath = '/historicalTrades';
+
+/// The endpoint to get the aggregated trades for a specific symbol.
+const String aggregatedTradesPath = '/aggTrades';
 // -----------------------------------
