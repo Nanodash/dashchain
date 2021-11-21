@@ -295,4 +295,51 @@ class BinanceRestApi {
       throw const BinanceApiError(-1, 'unexpected trades format');
     }
   }
+
+  /// Will get a specific symbol's aggregated trades using `/aggTrades` endpoint.
+  /// If [limit] is provided, will modify the max number of trades returned. (defaults to 100)
+  ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1
+  ///
+  /// Returns a list of [BinanceAggregatedTrade] containing all returned data when request is a success.
+  ///
+  /// Throws an [ArgumentError] if difference between start and end times is more than 1 hour.
+  /// Throws a [BinanceApiError] if any other error occurs.
+  Future<List<BinanceAggregatedTrade>> aggregatedTrades({
+    String baseUri = defaultUri,
+    required String symbol,
+    int limit = 100,
+    int? fromId,
+    DateTime? startTime,
+    DateTime? endtime,
+  }) async {
+    Map<String, String> params = {'symbol': symbol, 'limit': '$limit'};
+    if (fromId != null) {
+      params['fromId'] = '$fromId';
+    }
+    if (startTime != null) {
+      if (endtime != null) {
+        if (endtime.difference(startTime).inHours >= 1) {
+          throw ArgumentError(
+              'difference between start time and end time must be less than 1h');
+        }
+        params['endTime'] = '${endtime.millisecondsSinceEpoch}';
+      }
+      params['startTime'] = '${startTime.millisecondsSinceEpoch}';
+    }
+    final aggregatedTrades = await _sendRequest(
+      baseUri,
+      aggregatedTradesPath,
+      queryParameters: params,
+    );
+    if (aggregatedTrades is List) {
+      return List<BinanceAggregatedTrade>.from(
+        aggregatedTrades.map((t) => BinanceAggregatedTrade.fromJson(t)),
+      );
+    } else {
+      throw const BinanceApiError(-1, 'unexpected trades format');
+    }
+  }
 }

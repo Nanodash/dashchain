@@ -76,6 +76,14 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
           fromId: lastId,
         );
         print(historicalTrade);
+        final aggTrades = await api.aggregatedTrades(
+          baseUri: endpointUri,
+          symbol: bnbEthPair,
+          startTime:
+              DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
+          endtime: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+        print(aggTrades);
       }
     }
   }
