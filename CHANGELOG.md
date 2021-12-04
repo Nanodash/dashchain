@@ -1,3 +1,8 @@
+## 0.4.0
+
+- integrate `/historicalTrades` endpoint
+- integrate `/aggTrades` endpoint
+
 ## 0.3.0
 
 - integrate `/trades` endpoint

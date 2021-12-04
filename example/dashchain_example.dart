@@ -10,16 +10,16 @@ void main() async {
       await _testAPI(binance, defaultUri);
     } else {
       print('Binance REST API seems to be down, will try to fallback...');
-      String? endpointUrl;
+      String? endpointUri;
       try {
-        endpointUrl = await binance.getFallbackUri();
+        endpointUri = await binance.getFallbackUri();
       } catch (e) {
         print('Binance REST API is definitely down...($e)');
       }
-      if (endpointUrl != null) {
+      if (endpointUri != null) {
         print(
-            'Binance REST API is up and running on $endpointUrl, let\'s go !');
-        await _testAPI(binance, endpointUrl);
+            'Binance REST API is up and running on $endpointUri, let\'s go !');
+        await _testAPI(binance, endpointUri);
       }
     }
   } catch (e) {
@@ -35,34 +35,56 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
   print('will check for exchange symbols to trade...');
   final info = await api.exchangeInfo(baseUri: endpointUri);
   final tradeableSymbols =
-      info.symbols.where((s) => s.status == '${BinanceTradingStatus.trading}');
+      info.symbols.where((s) => s.status == BinanceTradingStatus.trading.value);
   print('found ${info.symbols.length} listed symbols of which '
       '${tradeableSymbols.length} are available for trade !');
   if (tradeableSymbols.any((s) => s.quoteAsset == 'ETH')) {
-    List<String> xEthSymbols = List<String>.from(tradeableSymbols
-        .where((s) => s.quoteAsset == 'ETH')
-        .map((s) => s.symbol));
+    List<BinanceSymbol> xEthSymbols = List<BinanceSymbol>.from(
+        tradeableSymbols.where((s) => s.quoteAsset == 'ETH'));
     print('found ${xEthSymbols.length} symbols with ETH as quote asset !');
     if (xEthSymbols.isNotEmpty) {
-      final firstFive = List<String>.from(xEthSymbols.take(5));
+      final firstFive =
+          List<String>.from(xEthSymbols.map((s) => s.symbol).take(5));
       print('will look for only first 5 symbols ($firstFive})');
       final ethExchangeInfo = await api.exchangeInfo(
         baseUri: endpointUri,
         symbols: firstFive,
       );
       print(ethExchangeInfo);
-      final firstEthPair = firstFive.first;
-      print('get orderbook depth for $firstEthPair');
-      final orderBookDepth50 = await api.orderBook(
-        symbol: firstEthPair,
-        limit: 50,
-      );
-      print(orderBookDepth50);
-      final tenLastTrades = await api.trades(
-        symbol: firstEthPair,
-        limit: 10,
-      );
-      print(tenLastTrades);
+      if (xEthSymbols.any((s) => s.baseAsset == 'BNB')) {
+        final bnbEthPair =
+            xEthSymbols.firstWhere((s) => s.baseAsset == 'BNB').symbol;
+        print('get orderbook depth for $bnbEthPair');
+        final orderBookDepth50 = await api.orderBook(
+          baseUri: endpointUri,
+          symbol: bnbEthPair,
+          limit: 50,
+        );
+        print(orderBookDepth50);
+        final tenLastTrades = await api.trades(
+          baseUri: endpointUri,
+          symbol: bnbEthPair,
+          limit: 10,
+        );
+        print(tenLastTrades);
+        final lastId = tenLastTrades.last.id;
+        print(lastId);
+        final historicalTrade = await api.historicalTrades(
+          baseUri: endpointUri,
+          symbol: bnbEthPair,
+          apiKey: _apiKey,
+          fromId: lastId,
+        );
+        print(historicalTrade);
+        final aggTrades = await api.aggregatedTrades(
+          baseUri: endpointUri,
+          symbol: bnbEthPair,
+          startTime:
+              DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
+          endtime: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+        print(aggTrades);
+      }
     }
   }
 }
