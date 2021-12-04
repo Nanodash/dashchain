@@ -124,6 +124,30 @@ void main() {
         ),
       ),
     );
+    late final MockClient klinesOkClient = MockClient(
+      (Request request) => Future.value(
+        Response(
+          jsonEncode([
+            [
+              1499040000000, // Open time
+              "0.01634790", // Open
+              "0.80000000", // High
+              "0.01575800", // Low
+              "0.01577100", // Close
+              "148976.11427815", // Volume
+              1499644799999, // Close time
+              "2434.19055334", // Quote asset volume
+              308, // Number of trades
+              "1756.87402397", // Taker buy base asset volume
+              "28.46694368", // Taker buy quote asset volume
+              "17928899.62484339" // Ignore.
+            ]
+          ]),
+          200,
+          reasonPhrase: 'klinesOkClient',
+        ),
+      ),
+    );
 
     setUpAll(() {
       _api = BinanceRestApi();
@@ -344,6 +368,25 @@ void main() {
         _api.apiClient = koClient;
         try {
           await _api.aggregatedTrades(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
+    group('klines tests', () {
+      test('OK klines should return List object', () async {
+        _api.dispose();
+        _api.apiClient = klinesOkClient;
+        final aggTrades =
+            await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
+        expect(aggTrades, isA<List>());
+      });
+      test('KO klines should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           expect(e, isA<BinanceApiError>());
