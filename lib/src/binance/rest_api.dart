@@ -350,10 +350,10 @@ class BinanceRestApi {
   ///
   /// Query weight : 1
   ///
-  /// Returns a list of [List] containing all returned data when request is a success.
+  /// Returns a list of [BinanceKline] containing all returned data when request is a success.
   ///
-  /// Throws a [BinanceApiError] if any other error occurs.
-  Future<List> candlestick({
+  /// Throws a [BinanceApiError] if any error occurs.
+  Future<List<BinanceKline>> candlestick({
     String baseUri = defaultUri,
     required String symbol,
     required Interval interval,
@@ -372,11 +372,23 @@ class BinanceRestApi {
     if (endtime != null) {
       params['endTime'] = '${endtime.millisecondsSinceEpoch}';
     }
-    final result = await _sendRequest(
+    final response = await _sendRequest(
       baseUri,
-      '/klines',
+      klinesPath,
       queryParameters: params,
     );
-    return result;
+    if (response is List) {
+      final klines = <BinanceKline>[];
+      for (final kline in response) {
+        if (kline is List && kline.length == 12) {
+          klines.add(BinanceKline.fromJson(kline));
+        } else {
+          throw const BinanceApiError(-1, 'unexpected nested kline format');
+        }
+      }
+      return klines;
+    } else {
+      throw const BinanceApiError(-1, 'unexpected klines format');
+    }
   }
 }
