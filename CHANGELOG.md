@@ -1,3 +1,7 @@
+## 0.5.0
+
+- integrate `/klines` endpoint
+
 ## 0.4.0
 
 - integrate `/historicalTrades` endpoint
