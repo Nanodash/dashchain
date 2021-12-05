@@ -371,10 +371,10 @@ class BinanceRestApi {
       params['startTime'] = '${startTime.millisecondsSinceEpoch}';
     }
     if (endtime != null) {
-      params['endTime'] = '${endtime.millisecondsSinceEpoch}';
       if (startTime != null && endtime.isBefore(startTime)) {
         throw ArgumentError('endTime should not be before startTime');
       }
+      params['endTime'] = '${endtime.millisecondsSinceEpoch}';
     }
 
     final response = await _sendRequest(
