@@ -434,6 +434,26 @@ void main() {
           expect(e, isA<BinanceApiError>());
         }
       });
+      test('klines with endtime before start time should throw', () async {
+        _api.dispose();
+        _api.apiClient = klinesOkClient;
+        final now = DateTime.now();
+        final start = now;
+        final end = now.subtract(const Duration(milliseconds: 1));
+        expect(end.isBefore(start), isTrue);
+        try {
+          await _api.candlestick(
+            symbol: 'BNBETH',
+            interval: Interval.d1,
+            startTime: start,
+            endtime: end,
+          );
+          fail('should have thrown an ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+      });
       test('KO klines should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;

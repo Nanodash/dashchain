@@ -352,7 +352,8 @@ class BinanceRestApi {
   ///
   /// Returns a list of [BinanceKline] containing all returned data when request is a success.
   ///
-  /// Throws a [BinanceApiError] if any error occurs.
+  /// Throws an [ArgumentError] if endTime is before startTime (API would return empty response anyway).
+  /// Throws a [BinanceApiError] if any other error occurs.
   Future<List<BinanceKline>> candlestick({
     String baseUri = defaultUri,
     required String symbol,
@@ -371,7 +372,11 @@ class BinanceRestApi {
     }
     if (endtime != null) {
       params['endTime'] = '${endtime.millisecondsSinceEpoch}';
+      if (startTime != null && endtime.isBefore(startTime)) {
+        throw ArgumentError('endTime should not be before startTime');
+      }
     }
+
     final response = await _sendRequest(
       baseUri,
       klinesPath,
