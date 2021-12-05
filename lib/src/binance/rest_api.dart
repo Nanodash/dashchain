@@ -376,7 +376,6 @@ class BinanceRestApi {
       }
       params['endTime'] = '${endtime.millisecondsSinceEpoch}';
     }
-
     final response = await _sendRequest(
       baseUri,
       klinesPath,
