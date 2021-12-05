@@ -37,4 +37,7 @@ const String historicalTradesPath = '/historicalTrades';
 
 /// The endpoint to get the aggregated trades for a specific symbol.
 const String aggregatedTradesPath = '/aggTrades';
+
+/// The endpoint to get the klines (or candlesticks) for a specific symbol.
+const String klinesPath = '/klines';
 // -----------------------------------

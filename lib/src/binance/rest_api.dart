@@ -342,4 +342,57 @@ class BinanceRestApi {
       throw const BinanceApiError(-1, 'unexpected trades format');
     }
   }
+
+  /// Will get a specific symbol's KLines (also known as candlesticks) using `/klines` endpoint.
+  /// If [limit] is provided, will modify the max number of KLines returned. (defaults to 100)
+  ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1
+  ///
+  /// Returns a list of [BinanceKline] containing all returned data when request is a success.
+  ///
+  /// Throws an [ArgumentError] if endTime is before startTime (API would return empty response anyway).
+  /// Throws a [BinanceApiError] if any other error occurs.
+  Future<List<BinanceKline>> candlestick({
+    String baseUri = defaultUri,
+    required String symbol,
+    required Interval interval,
+    int limit = 100,
+    DateTime? startTime,
+    DateTime? endtime,
+  }) async {
+    Map<String, String> params = {
+      'symbol': symbol,
+      'interval': interval.value,
+      'limit': '$limit',
+    };
+    if (startTime != null) {
+      params['startTime'] = '${startTime.millisecondsSinceEpoch}';
+    }
+    if (endtime != null) {
+      if (startTime != null && endtime.isBefore(startTime)) {
+        throw ArgumentError('endTime should not be before startTime');
+      }
+      params['endTime'] = '${endtime.millisecondsSinceEpoch}';
+    }
+    final response = await _sendRequest(
+      baseUri,
+      klinesPath,
+      queryParameters: params,
+    );
+    if (response is List) {
+      final klines = <BinanceKline>[];
+      for (final kline in response) {
+        if (kline is List && kline.length == 12) {
+          klines.add(BinanceKline.fromJson(kline));
+        } else {
+          throw const BinanceApiError(-1, 'unexpected nested kline format');
+        }
+      }
+      return klines;
+    } else {
+      throw const BinanceApiError(-1, 'unexpected klines format');
+    }
+  }
 }

@@ -84,6 +84,12 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
           endtime: DateTime.now().subtract(const Duration(hours: 1)),
         );
         print(aggTrades);
+        final klines = await api.candlestick(
+          symbol: bnbEthPair,
+          interval: Interval.d1,
+          limit: 10,
+        );
+        print(klines);
       }
     }
   }
