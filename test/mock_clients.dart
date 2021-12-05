@@ -5,20 +5,23 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 
 // MockClients in order to tests every cases
-// classic OK/KO clients
+/// simple OK client
 late final MockClient okClient =
     MockClient((Request request) => Future.value(Response(
           '{}',
           200,
           reasonPhrase: 'okClient',
         )));
+
+/// simple KO client
 late final MockClient koClient =
     MockClient((Request request) => Future.value(Response(
           '{}',
           400,
           reasonPhrase: 'koClient',
         )));
-// clients that would send 200 only in specific case
+
+/// client that would send `200` only if querying `api2`
 late final MockClient okClientApi2 = MockClient((Request request) {
   var statusCode = 200;
   if (!request.url.host.contains('api2')) statusCode = 400;
@@ -28,6 +31,8 @@ late final MockClient okClientApi2 = MockClient((Request request) {
     reasonPhrase: 'okClientApi2',
   ));
 });
+
+/// client that would send `200` only if querying `api3`
 late final MockClient okClientApi3 = MockClient((Request request) {
   var statusCode = 200;
   if (!request.url.host.contains('api3')) statusCode = 400;
@@ -37,7 +42,8 @@ late final MockClient okClientApi3 = MockClient((Request request) {
     reasonPhrase: 'okClientApi3',
   ));
 });
-// client duplicating /time answer
+
+/// client duplicating `/time` answer
 late final MockClient timeOkClient = MockClient(
   (Request request) => Future.value(
     Response(
@@ -47,7 +53,8 @@ late final MockClient timeOkClient = MockClient(
     ),
   ),
 );
-// client duplicating /exchangeInfo answer
+
+/// client duplicating `/exchangeInfo` answer
 late final MockClient exchangeInfoOkClient = MockClient(
   (Request request) => Future.value(
     Response(
@@ -57,7 +64,8 @@ late final MockClient exchangeInfoOkClient = MockClient(
     ),
   ),
 );
-// client duplicating /exchangeInfo answer
+
+/// client duplicating `/orderBook` answer
 late final MockClient orderBookOkClient = MockClient(
   (Request request) => Future.value(
     Response(
@@ -67,7 +75,8 @@ late final MockClient orderBookOkClient = MockClient(
     ),
   ),
 );
-// clients duplicating /trades answer
+
+/// client duplicating `/trades` answer
 late final MockClient tradesOkClient = MockClient(
   (Request request) => Future.value(
     Response(
@@ -87,7 +96,8 @@ late final MockClient tradesOkClient = MockClient(
     ),
   ),
 );
-// clients duplicating /aggTrades answer
+
+/// client duplicating `/aggTrades` answer
 late final MockClient aggTradesOkClient = MockClient(
   (Request request) => Future.value(
     Response(
@@ -108,6 +118,8 @@ late final MockClient aggTradesOkClient = MockClient(
     ),
   ),
 );
+
+/// client that returns a [Map] (used to test methods that expect a [List])
 late final MockClient notAListClient = MockClient(
   (Request request) => Future.value(
     Response(
@@ -117,6 +129,8 @@ late final MockClient notAListClient = MockClient(
     ),
   ),
 );
+
+/// client duplicating `/klines` answer
 late final MockClient klinesOkClient = MockClient(
   (Request request) => Future.value(
     Response(
@@ -141,7 +155,8 @@ late final MockClient klinesOkClient = MockClient(
     ),
   ),
 );
-// missing some fields (ie. length != 12)
+
+/// missing some fields in expected `/klines` answer (ie. length != 12)
 late final MockClient klinesKoClient = MockClient(
   (Request request) => Future.value(
     Response(
