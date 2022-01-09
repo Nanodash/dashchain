@@ -395,4 +395,23 @@ class BinanceRestApi {
       throw const BinanceApiError(-1, 'unexpected klines format');
     }
   }
+
+  /// Will get a specific symbol's current average price.
+  ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1
+  ///
+  /// Returns a [BinanceAveragePrice] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  Future<BinanceAveragePrice> averagePrice({
+    String baseUri = defaultUri,
+    required String symbol,
+  }) async =>
+      BinanceAveragePrice.fromJson(await _sendRequest(
+        baseUri,
+        avgPricePath,
+        queryParameters: {'symbol': symbol},
+      ));
 }
