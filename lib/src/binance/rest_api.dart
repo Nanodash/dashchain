@@ -395,4 +395,46 @@ class BinanceRestApi {
       throw const BinanceApiError(-1, 'unexpected klines format');
     }
   }
+
+  /// Will get a specific symbol's statistics for the last 24 hours.
+  ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1 for a specific symbol, **40** otherwise
+  ///
+  /// Returns a [BinanceDayTicker] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  Future<List<BinanceDayTicker>> dayTicker({
+    String baseUri = defaultUri,
+    String? symbol,
+  }) async {
+    final response = await _sendRequest(
+      baseUri,
+      dayTickerPath,
+      queryParameters: symbol != null ? {'symbol': symbol} : null,
+    );
+    if (symbol == null) {
+      // list of tickers
+      if (response is List) {
+        final tickers = <BinanceDayTicker>[];
+        for (final ticker in response) {
+          if (ticker is Map<String, dynamic>) {
+            tickers.add(BinanceDayTicker.fromJson(ticker));
+          } else {
+            throw const BinanceApiError(-1, 'unexpected nested ticker format');
+          }
+        }
+        return tickers;
+      }
+    } else {
+      // one ticker
+      if (response is Map) {
+        if (response is Map<String, dynamic>) {
+          return [BinanceDayTicker.fromJson(response)];
+        }
+      }
+    }
+    throw const BinanceApiError(-1, 'unexpected ticker format');
+  }
 }

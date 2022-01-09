@@ -90,6 +90,12 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
           limit: 10,
         );
         print(klines);
+        var dayTicker = await api.dayTicker(
+          symbol: bnbEthPair,
+        );
+        print(dayTicker);
+        dayTicker = await api.dayTicker();
+        print(dayTicker);
       }
     }
   }

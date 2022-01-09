@@ -40,4 +40,7 @@ const String aggregatedTradesPath = '/aggTrades';
 
 /// The endpoint to get the klines (or candlesticks) for a specific symbol.
 const String klinesPath = '/klines';
+
+/// The endpoint to get the 24hr statistics symbol(s).
+const String dayTickerPath = '/ticker/24hr';
 // -----------------------------------
