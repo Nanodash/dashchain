@@ -307,5 +307,20 @@ void main() {
         }
       });
     });
+
+    group('/avgPrice tests', () {
+      test('OK avgPrice should return a BinanceAveragePrice', () async {
+        _api.dispose();
+        _api.apiClient = avgPriceOkClient;
+        final avgPrice = await _api.averagePrice(symbol: 'BNBETH');
+        expect(avgPrice, isA<BinanceAveragePrice>());
+      });
+      test('KO avgPrice should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        final ping = await _api.ping();
+        expect(ping, isFalse);
+      });
+    });
   });
 }

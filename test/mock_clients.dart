@@ -176,3 +176,14 @@ late final MockClient klinesKoClient = MockClient(
     ),
   ),
 );
+
+/// client duplicating `/avgPrice` answer
+late final MockClient avgPriceOkClient = MockClient(
+  (Request request) => Future.value(
+    Response(
+      jsonEncode({"mins": 5, "price": "9.35751834"}),
+      200,
+      reasonPhrase: 'avgPriceOkClient',
+    ),
+  ),
+);
