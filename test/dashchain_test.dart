@@ -318,8 +318,13 @@ void main() {
       test('KO avgPrice should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
-        final ping = await _api.ping();
-        expect(ping, isFalse);
+        try {
+          await _api.averagePrice(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
       });
     });
   });
