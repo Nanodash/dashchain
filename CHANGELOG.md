@@ -1,3 +1,8 @@
+## 0.6.0
+
+- integrate `/avgPrice` endpoint
+- integrate `/ticker/24hr` endpoint
+
 ## 0.5.0
 
 - integrate `/klines` endpoint
