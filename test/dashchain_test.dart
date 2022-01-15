@@ -307,6 +307,25 @@ void main() {
         }
       });
     });
+    group('/avgPrice tests', () {
+      test('OK avgPrice should return a BinanceAveragePrice', () async {
+        _api.dispose();
+        _api.apiClient = avgPriceOkClient;
+        final avgPrice = await _api.averagePrice(symbol: 'BNBETH');
+        expect(avgPrice, isA<BinanceAveragePrice>());
+      });
+      test('KO avgPrice should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.averagePrice(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
     group('dayTicker tests', () {
       test('OK dayTicker should return List object', () async {
         // select symbol, only 1 entry in the list
