@@ -86,10 +86,18 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
         print(aggTrades);
         final klines = await api.candlestick(
           symbol: bnbEthPair,
-          interval: Interval.d1,
-          limit: 10,
+          interval: Interval.w4,
+          limit: 4,
         );
         print(klines);
+        final averagePrice = await api.averagePrice(symbol: bnbEthPair);
+        print(averagePrice);
+        var dayTicker = await api.dayTicker(
+          symbol: bnbEthPair,
+        );
+        print(dayTicker);
+        dayTicker = await api.dayTicker();
+        print(dayTicker);
       }
     }
   }
