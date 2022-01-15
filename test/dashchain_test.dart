@@ -307,7 +307,6 @@ void main() {
         }
       });
     });
-
     group('/avgPrice tests', () {
       test('OK avgPrice should return a BinanceAveragePrice', () async {
         _api.dispose();
@@ -320,6 +319,55 @@ void main() {
         _api.apiClient = koClient;
         try {
           await _api.averagePrice(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
+    group('dayTicker tests', () {
+      test('OK dayTicker should return List object', () async {
+        // select symbol, only 1 entry in the list
+        _api.dispose();
+        _api.apiClient = dayTickerOkClient;
+        final dayTicker = await _api.dayTicker(symbol: 'BNBETH');
+        expect(dayTicker, isA<List<BinanceDayTicker>>());
+        expect(dayTicker.length, equals(1));
+        // don't select symbol, more than 1 entry in the list
+        _api.dispose();
+        _api.apiClient = dayTickerOkClient2;
+        final dayTickers = await _api.dayTicker();
+        expect(dayTickers, isA<List<BinanceDayTicker>>());
+        expect(dayTickers.length, greaterThan(1));
+      });
+      test('bad format dayTicker should throw', () async {
+        // select symbol but list returned
+        _api.dispose();
+        _api.apiClient = dayTickerOkClient2;
+        try {
+          await _api.dayTicker(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        // no symbol selected but map returned
+        _api.dispose();
+        _api.apiClient = dayTickerOkClient;
+        try {
+          await _api.dayTicker();
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('KO dayTicker should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.dayTicker(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);

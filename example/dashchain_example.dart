@@ -92,6 +92,12 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
         print(klines);
         final averagePrice = await api.averagePrice(symbol: bnbEthPair);
         print(averagePrice);
+        var dayTicker = await api.dayTicker(
+          symbol: bnbEthPair,
+        );
+        print(dayTicker);
+        dayTicker = await api.dayTicker();
+        print(dayTicker);
       }
     }
   }
