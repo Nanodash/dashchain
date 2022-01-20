@@ -7,4 +7,5 @@ export 'order_book/order_book.dart';
 export 'rate_limiter/rate_limiter.dart';
 export 'symbol/symbol.dart';
 export 'tickers/day_ticker.dart';
+export 'tickers/price_ticker.dart';
 export 'trade/trade.dart';

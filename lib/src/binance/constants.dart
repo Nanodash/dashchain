@@ -46,4 +46,7 @@ const String avgPricePath = '/avgPrice';
 
 /// The endpoint to get the 24hr statistics symbol(s).
 const String dayTickerPath = '/ticker/24hr';
+
+/// The endpoint to get the current price of symbol(s).
+const String priceTickerPath = '/ticker/price';
 // -----------------------------------

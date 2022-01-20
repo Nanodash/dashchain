@@ -1,7 +1,6 @@
 import 'package:test/test.dart';
 
 import 'package:dashchain/dashchain.dart';
-
 import 'mock_clients.dart';
 
 // ignore_for_file: avoid_print
@@ -364,6 +363,55 @@ void main() {
         }
       });
       test('KO dayTicker should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.dayTicker(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
+    group('priceTicker tests', () {
+      test('OK priceTicker should return List object', () async {
+        // select symbol, only 1 entry in the list
+        _api.dispose();
+        _api.apiClient = priceTickerOkClient;
+        final priceTicker = await _api.priceTicker(symbol: 'BNBETH');
+        expect(priceTicker, isA<List<BinancePriceTicker>>());
+        expect(priceTicker.length, equals(1));
+        // don't select symbol, more than 1 entry in the list
+        _api.dispose();
+        _api.apiClient = priceTickerOkClient2;
+        final priceTickers = await _api.priceTicker();
+        expect(priceTickers, isA<List<BinancePriceTicker>>());
+        expect(priceTickers.length, greaterThan(1));
+      });
+      test('bad format priceTicker should throw', () async {
+        // select symbol but list returned
+        _api.dispose();
+        _api.apiClient = priceTickerOkClient2;
+        try {
+          await _api.priceTicker(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        // no symbol selected but map returned
+        _api.dispose();
+        _api.apiClient = priceTickerOkClient;
+        try {
+          await _api.priceTicker();
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('KO priceTicker should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
         try {
