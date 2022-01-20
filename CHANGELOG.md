@@ -1,3 +1,8 @@
+## 0.7.0
+
+- integrate `/ticker/price` endpoint
+- upgrade dependencies
+
 ## 0.6.0
 
 - integrate `/avgPrice` endpoint
