@@ -1,8 +1,9 @@
 import 'dart:convert';
 
-import 'package:dashchain/dashchain.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
+
+import 'package:dashchain/dashchain.dart';
 
 // MockClients in order to tests every cases
 /// simple OK client
@@ -299,6 +300,31 @@ late final MockClient dayTickerOkClient2 = MockClient(
       ),
       200,
       reasonPhrase: 'dayTickerOkClient2',
+    ),
+  ),
+);
+
+late final MockClient priceTickerOkClient = MockClient(
+  (Request request) => Future.value(
+    Response(
+      jsonEncode({"symbol": "BNBBTC", "price": "4.00000200"}),
+      200,
+      reasonPhrase: 'priceTickerOkClient',
+    ),
+  ),
+);
+late final MockClient priceTickerOkClient2 = MockClient(
+  (Request request) => Future.value(
+    Response(
+      jsonEncode(
+        [
+          {"symbol": "BNBBTC", "price": "4.00000200"},
+          {"symbol": "BNBBTC", "price": "4.00000200"},
+          {"symbol": "BNBBTC", "price": "4.00000200"},
+        ],
+      ),
+      200,
+      reasonPhrase: 'priceTickerOkClient2',
     ),
   ),
 );
