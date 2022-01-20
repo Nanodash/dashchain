@@ -415,13 +415,13 @@ class BinanceRestApi {
         queryParameters: {'symbol': symbol},
       ));
 
-  /// Will get a specific symbol's statistics for the last 24 hours.
+  /// Will get statistics for the last 24 hours on a specific symbol or all.
   ///
   /// API Key required : no
   ///
   /// Query weight : 1 for a specific symbol, **40** otherwise
   ///
-  /// Returns a [BinanceDayTicker] containing all returned data when request is a success.
+  /// Returns a list of [BinanceDayTicker] containing all returned data when request is a success.
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   Future<List<BinanceDayTicker>> dayTicker({
@@ -451,6 +451,48 @@ class BinanceRestApi {
       if (response is Map) {
         if (response is Map<String, dynamic>) {
           return [BinanceDayTicker.fromJson(response)];
+        }
+      }
+    }
+    throw const BinanceApiError(-1, 'unexpected ticker format');
+  }
+
+  /// Will get ticker(s) for current price(s).
+  ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1 for a specific symbol, 2 otherwise
+  ///
+  /// Returns a list of [BinancePriceTicker] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  Future<List<BinancePriceTicker>> priceTicker({
+    String baseUri = defaultUri,
+    String? symbol,
+  }) async {
+    final response = await _sendRequest(
+      baseUri,
+      priceTickerPath,
+      queryParameters: symbol != null ? {'symbol': symbol} : null,
+    );
+    if (symbol == null) {
+      // list of tickers
+      if (response is List) {
+        final tickers = <BinancePriceTicker>[];
+        for (final ticker in response) {
+          if (ticker is Map<String, dynamic>) {
+            tickers.add(BinancePriceTicker.fromJson(ticker));
+          } else {
+            throw const BinanceApiError(-1, 'unexpected nested ticker format');
+          }
+        }
+        return tickers;
+      }
+    } else {
+      // one ticker
+      if (response is Map) {
+        if (response is Map<String, dynamic>) {
+          return [BinancePriceTicker.fromJson(response)];
         }
       }
     }
