@@ -1,3 +1,7 @@
+## 0.8.0
+
+- integrate `/ticker/bookTicker` endpoint
+
 ## 0.7.0
 
 - integrate `/ticker/price` endpoint
