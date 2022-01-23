@@ -498,4 +498,46 @@ class BinanceRestApi {
     }
     throw const BinanceApiError(-1, 'unexpected ticker format');
   }
+
+  /// Will get book ticker(s) for given symbol or all symbols.
+  ///
+  /// API Key required : no
+  ///
+  /// Query weight : 1 for a specific symbol, 2 otherwise
+  ///
+  /// Returns a list of [BinanceBookTicker] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  Future<List<BinanceBookTicker>> bookTicker({
+    String baseUri = defaultUri,
+    String? symbol,
+  }) async {
+    final response = await _sendRequest(
+      baseUri,
+      bookTickerPath,
+      queryParameters: symbol != null ? {'symbol': symbol} : null,
+    );
+    if (symbol == null) {
+      // list of tickers
+      if (response is List) {
+        final tickers = <BinanceBookTicker>[];
+        for (final ticker in response) {
+          if (ticker is Map<String, dynamic>) {
+            tickers.add(BinanceBookTicker.fromJson(ticker));
+          } else {
+            throw const BinanceApiError(-1, 'unexpected nested ticker format');
+          }
+        }
+        return tickers;
+      }
+    } else {
+      // one ticker
+      if (response is Map) {
+        if (response is Map<String, dynamic>) {
+          return [BinanceBookTicker.fromJson(response)];
+        }
+      }
+    }
+    throw const BinanceApiError(-1, 'unexpected ticker format');
+  }
 }
