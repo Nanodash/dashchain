@@ -104,6 +104,12 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
         print(priceTicker);
         priceTicker = await api.priceTicker();
         print(priceTicker);
+        var bookTicker = await api.bookTicker(
+          symbol: bnbEthPair,
+        );
+        print(bookTicker);
+        bookTicker = await api.bookTicker();
+        print(bookTicker);
       }
     }
   }
