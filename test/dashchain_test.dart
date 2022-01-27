@@ -464,7 +464,7 @@ void main() {
         _api.dispose();
         _api.apiClient = koClient;
         try {
-          await _api.dayTicker(symbol: 'BNBETH');
+          await _api.bookTicker(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
