@@ -328,3 +328,45 @@ late final MockClient priceTickerOkClient2 = MockClient(
     ),
   ),
 );
+
+late final MockClient bookTickerOkClient = MockClient(
+  (Request request) => Future.value(
+    Response(
+      jsonEncode({
+        "symbol": "LTCBTC",
+        "bidPrice": "4.00000000",
+        "bidQty": "431.00000000",
+        "askPrice": "4.00000200",
+        "askQty": "9.00000000"
+      }),
+      200,
+      reasonPhrase: 'bookTickerOkClient',
+    ),
+  ),
+);
+late final MockClient bookTickerOkClient2 = MockClient(
+  (Request request) => Future.value(
+    Response(
+      jsonEncode(
+        [
+          {
+            "symbol": "LTCBTC",
+            "bidPrice": "4.00000000",
+            "bidQty": "431.00000000",
+            "askPrice": "4.00000200",
+            "askQty": "9.00000000"
+          },
+          {
+            "symbol": "ETHBTC",
+            "bidPrice": "0.07946700",
+            "bidQty": "9.00000000",
+            "askPrice": "100000.00000000",
+            "askQty": "1000.00000000"
+          }
+        ],
+      ),
+      200,
+      reasonPhrase: 'bookTickerOkClient2',
+    ),
+  ),
+);

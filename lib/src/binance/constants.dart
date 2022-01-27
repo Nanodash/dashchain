@@ -49,4 +49,7 @@ const String dayTickerPath = '/ticker/24hr';
 
 /// The endpoint to get the current price of symbol(s).
 const String priceTickerPath = '/ticker/price';
+
+/// The endpoint to get the book ticker of symbol(s).
+const String bookTickerPath = '/ticker/bookTicker';
 // -----------------------------------

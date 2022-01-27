@@ -423,5 +423,54 @@ void main() {
         }
       });
     });
+    group('bookTicker tests', () {
+      test('OK bookTicker should return List object', () async {
+        // select symbol, only 1 entry in the list
+        _api.dispose();
+        _api.apiClient = bookTickerOkClient;
+        final bookTicker = await _api.bookTicker(symbol: 'BNBETH');
+        expect(bookTicker, isA<List<BinanceBookTicker>>());
+        expect(bookTicker.length, equals(1));
+        // don't select symbol, more than 1 entry in the list
+        _api.dispose();
+        _api.apiClient = bookTickerOkClient2;
+        final bookTickers = await _api.bookTicker();
+        expect(bookTickers, isA<List<BinanceBookTicker>>());
+        expect(bookTickers.length, greaterThan(1));
+      });
+      test('bad format bookTicker should throw', () async {
+        // select symbol but list returned
+        _api.dispose();
+        _api.apiClient = bookTickerOkClient2;
+        try {
+          await _api.bookTicker(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        // no symbol selected but map returned
+        _api.dispose();
+        _api.apiClient = bookTickerOkClient;
+        try {
+          await _api.bookTicker();
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('KO bookTicker should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.bookTicker(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
   });
 }
