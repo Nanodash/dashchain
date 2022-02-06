@@ -540,4 +540,99 @@ class BinanceRestApi {
     }
     throw const BinanceApiError(-1, 'unexpected ticker format');
   }
+
+  /// Will send a trade order to the matching engine.
+  ///
+  /// API Key required : yes (+ signature)
+  ///
+  /// Query weight : 1
+  ///
+  /// Returns a response based on the given [orderResponseType].
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  ///
+  /// _Other info: (from docs)
+  /// Any `LIMIT` or `LIMIT_MAKER` type order can be made an iceberg order by sending an `icebergQty`.
+  /// Any order with an `icebergQty` **MUST** have `timeInForce` set to `GTC`.
+  /// `MARKET` orders using `quoteOrderQty` will not break `LOT_SIZE` filter rules; the order will execute a quantity that will have the notional value as close as possible to `quoteOrderQty`. Trigger order price rules against market price for both `MARKET` and `LIMIT` versions:
+  /// Price above market price: `STOP_LOSS` BUY, `TAKE_PROFIT` SELL
+  /// Price below market price: `STOP_LOSS` SELL, `TAKE_PROFIT` BUY_
+  Future<dynamic> sendOrder({
+    String baseUri = defaultUri,
+    required String symbol,
+    Side side = Side.buy,
+    OrderType type = OrderType.limit,
+    TimeInForce? timeInForce,
+    double? quantity,
+    double? quoteOrderQty,
+    double? price,
+
+    /// A unique id among open orders. Automatically generated if not sent.
+    /// Orders with the same newClientOrderID can be accepted only when the previous one is filled,
+    /// otherwise the order will be rejected.
+    String? newClientOrderId,
+
+    /// Used with `STOP_LOSS`, `STOP_LOSS_LIMIT`, `TAKE_PROFIT`, and `TAKE_PROFIT_LIMIT` orders.
+    double? stopPrice,
+
+    /// Used with `LIMIT`, `STOP_LOSS_LIMIT`, and `TAKE_PROFIT_LIMIT to create an iceberg order.
+    double? icebergQty,
+    OrderResponseType? orderResponseType,
+    int recvWindow = 5000,
+  }) async {
+    const kMinRecvWindow = 0;
+    const kMaxRecvWindow = 60000;
+    if (recvWindow < kMinRecvWindow || recvWindow > kMaxRecvWindow) {
+      throw RangeError(
+          'recvWindow should be a positive value less than $kMaxRecvWindow');
+    }
+    if (OrderType.limit == type) {
+      if (quantity == null) throw ArgumentError.notNull('quantity');
+      if (price == null) throw ArgumentError.notNull('price');
+      if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
+    }
+    if (OrderType.market == type) {
+      // MARKET orders using the quantity field specifies the amount of the base asset the user wants to buy or sell at the market price.
+      // E.g. MARKET order on BTCUSDT will specify how much BTC the user is buying or selling.
+      //
+      // MARKET orders using quoteOrderQty specifies the amount the user wants to spend (when buying) or receive (when selling)
+      // the quote asset; the correct quantity will be determined based on the market liquidity and quoteOrderQty.
+      //
+      // E.g. Using the symbol BTCUSDT:
+      // BUY side, the order will buy as many BTC as quoteOrderQty USDT can.
+      // SELL side, the order will sell as much BTC needed to receive quoteOrderQty USDT.
+      if (quantity == null) throw ArgumentError.notNull('quantity');
+      if (quoteOrderQty == null) throw ArgumentError.notNull('quoteOrderQty');
+    }
+    if (OrderType.stopLoss == type) {
+      // This will execute a MARKET order when the stopPrice is reached.
+      if (price == null) throw ArgumentError.notNull('price');
+      if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+    }
+    if (OrderType.stopLossLimit == type) {
+      if (quantity == null) throw ArgumentError.notNull('quantity');
+      if (price == null) throw ArgumentError.notNull('price');
+      if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+      if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
+    }
+    if (OrderType.takeProfit == type) {
+      // This will execute a MARKET order when the stopPrice is reached.
+      if (price == null) throw ArgumentError.notNull('price');
+      if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+    }
+    if (OrderType.takeProfitLimit == type) {
+      if (quantity == null) throw ArgumentError.notNull('quantity');
+      if (price == null) throw ArgumentError.notNull('price');
+      if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+      if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
+    }
+    if (OrderType.limitMaker == type) {
+      // This is a LIMIT order that will be rejected if the order immediately matches and trades as a taker.
+      // This is also known as a POST-ONLY order.
+      if (quantity == null) throw ArgumentError.notNull('quantity');
+      if (price == null) throw ArgumentError.notNull('price');
+    }
+    final result = await _sendRequest(baseUri, '/order');
+    return result;
+  }
 }
