@@ -72,7 +72,6 @@ Future<void> _testAPI(BinanceRestApi api, String endpointUri) async {
         final historicalTrade = await api.historicalTrades(
           baseUri: endpointUri,
           symbol: bnbEthPair,
-          apiKey: _apiKey,
           fromId: lastId,
         );
         print(historicalTrade);

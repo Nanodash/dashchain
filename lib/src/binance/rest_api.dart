@@ -24,6 +24,12 @@ class BinanceRestApi {
   /// Exposing setter for mocking capabilities in unit tests
   set apiClient(http.Client client) => _apiClient = client;
 
+  /// The user's API key
+  String? apiKey;
+
+  /// The user's API **secret** key
+  String? apiSecretKey;
+
   /// This variable will track the current IP used weight, that _- if high enough -_ may mean that too many requests has been done.
   ///
   /// Because it can lead to IP ban, we have to be careful with this.
@@ -49,17 +55,40 @@ class BinanceRestApi {
   Future<dynamic> _sendRequest(
     String baseUri,
     String resourcePath, {
-    Map<String, String>? headers,
+    RequestMethod requestMethod = RequestMethod.get,
     Map<String, String>? queryParameters,
+    bool withTimestamp = false,
+    bool withSignature = false,
+    bool withKey = false,
+    bool withSecretKey = false,
   }) async {
     final uri = Uri.https(
       baseUri,
       '$apiPath$resourcePath',
       queryParameters,
     );
-    _log('GET $uri');
+    Map<String, String>? headers;
+    if (withKey) {
+      if (null == apiKey) {
+        throw const BinanceApiError(-1, 'apiKey must not be null');
+      }
+      headers = {xMbxApiKeyHeader: apiKey!};
+    }
+    queryParameters ??= <String, String>{};
+    if (withTimestamp) {
+      queryParameters['timestamp'] = '${DateTime.now().millisecondsSinceEpoch}';
+    }
+    http.Response response;
+    _log('${requestMethod.value} $uri');
     _restartStopwatch();
-    final response = await _apiClient.get(uri, headers: headers);
+    switch (requestMethod) {
+      case RequestMethod.get:
+        response = await _apiClient.get(uri, headers: headers);
+        break;
+      case RequestMethod.post:
+        response = await _apiClient.post(uri, headers: headers);
+        break;
+    }
     _log('received answer after ${_stopwatch.elapsedMilliseconds}ms.');
     switch (response.statusCode) {
       case 200:
@@ -273,7 +302,6 @@ class BinanceRestApi {
   Future<List<BinanceTrade>> historicalTrades({
     String baseUri = defaultUri,
     required String symbol,
-    required String apiKey,
     int limit = 100,
     int? fromId,
   }) async {
@@ -284,8 +312,8 @@ class BinanceRestApi {
     final historicalTrades = await _sendRequest(
       baseUri,
       historicalTradesPath,
-      headers: {xMbxApiKeyHeader: apiKey},
       queryParameters: params,
+      withKey: true,
     );
     if (historicalTrades is List) {
       return List<BinanceTrade>.from(
@@ -547,17 +575,17 @@ class BinanceRestApi {
   ///
   /// Query weight : 1
   ///
-  /// Returns a response based on the given [orderResponseType].
+  /// Returns a [BinanceTradeResponse] based on the given [orderResponseType].
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   ///
-  /// _Other info: (from docs)
-  /// Any `LIMIT` or `LIMIT_MAKER` type order can be made an iceberg order by sending an `icebergQty`.
+  /// Other info from docs :
+  /// _Any `LIMIT` or `LIMIT_MAKER` type order can be made an iceberg order by sending an `icebergQty`.
   /// Any order with an `icebergQty` **MUST** have `timeInForce` set to `GTC`.
   /// `MARKET` orders using `quoteOrderQty` will not break `LOT_SIZE` filter rules; the order will execute a quantity that will have the notional value as close as possible to `quoteOrderQty`. Trigger order price rules against market price for both `MARKET` and `LIMIT` versions:
   /// Price above market price: `STOP_LOSS` BUY, `TAKE_PROFIT` SELL
   /// Price below market price: `STOP_LOSS` SELL, `TAKE_PROFIT` BUY_
-  Future<dynamic> sendOrder({
+  Future<BinanceTradeResponse> sendOrder({
     String baseUri = defaultUri,
     required String symbol,
     Side side = Side.buy,
@@ -606,7 +634,7 @@ class BinanceRestApi {
     }
     if (OrderType.stopLoss == type) {
       // This will execute a MARKET order when the stopPrice is reached.
-      if (price == null) throw ArgumentError.notNull('price');
+      if (quantity == null) throw ArgumentError.notNull('price');
       if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
     }
     if (OrderType.stopLossLimit == type) {
@@ -617,7 +645,7 @@ class BinanceRestApi {
     }
     if (OrderType.takeProfit == type) {
       // This will execute a MARKET order when the stopPrice is reached.
-      if (price == null) throw ArgumentError.notNull('price');
+      if (quantity == null) throw ArgumentError.notNull('price');
       if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
     }
     if (OrderType.takeProfitLimit == type) {
@@ -632,7 +660,10 @@ class BinanceRestApi {
       if (quantity == null) throw ArgumentError.notNull('quantity');
       if (price == null) throw ArgumentError.notNull('price');
     }
+    if (null != icebergQty) {
+      timeInForce = TimeInForce.gtc;
+    }
     final result = await _sendRequest(baseUri, '/order');
-    return result;
+    return BinanceTradeResponse.fromJson(result);
   }
 }

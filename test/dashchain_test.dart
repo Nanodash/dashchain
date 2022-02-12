@@ -158,15 +158,16 @@ void main() {
       test('OK historicalTrades should return BinanceTrade object', () async {
         _api.dispose();
         _api.apiClient = tradesOkClient;
-        final historicalTrades =
-            await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+        _api.apiKey ??= 'apiKey';
+        final historicalTrades = await _api.historicalTrades(symbol: 'BNBETH');
         expect(historicalTrades, isA<List<BinanceTrade>>());
       });
       test('bad format historicalTrades should throw', () async {
         _api.dispose();
         _api.apiClient = notAListClient;
+        _api.apiKey ??= 'apiKey';
         try {
-          await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+          await _api.historicalTrades(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
@@ -176,8 +177,21 @@ void main() {
       test('KO historicalTrades should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
+        _api.apiKey ??= 'apiKey';
         try {
-          await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+          await _api.historicalTrades(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('no API key historicalTrades should throw', () async {
+        _api.dispose();
+        _api.apiClient = okClient;
+        _api.apiKey = null;
+        try {
+          await _api.historicalTrades(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
