@@ -56,7 +56,7 @@ class BinanceRestApi {
     String baseUri,
     String resourcePath, {
     RequestMethod requestMethod = RequestMethod.get,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     bool withTimestamp = false,
     bool withSignature = false,
     bool withKey = false,
@@ -74,7 +74,7 @@ class BinanceRestApi {
       }
       headers = {xMbxApiKeyHeader: apiKey!};
     }
-    queryParameters ??= <String, String>{};
+    queryParameters ??= <String, dynamic>{};
     if (withTimestamp) {
       queryParameters['timestamp'] = '${DateTime.now().millisecondsSinceEpoch}';
     }
@@ -614,56 +614,71 @@ class BinanceRestApi {
       throw RangeError(
           'recvWindow should be a positive value less than $kMaxRecvWindow');
     }
-    if (OrderType.limit == type) {
-      if (quantity == null) throw ArgumentError.notNull('quantity');
-      if (price == null) throw ArgumentError.notNull('price');
-      if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
-    }
-    if (OrderType.market == type) {
-      // MARKET orders using the quantity field specifies the amount of the base asset the user wants to buy or sell at the market price.
-      // E.g. MARKET order on BTCUSDT will specify how much BTC the user is buying or selling.
-      //
-      // MARKET orders using quoteOrderQty specifies the amount the user wants to spend (when buying) or receive (when selling)
-      // the quote asset; the correct quantity will be determined based on the market liquidity and quoteOrderQty.
-      //
-      // E.g. Using the symbol BTCUSDT:
-      // BUY side, the order will buy as many BTC as quoteOrderQty USDT can.
-      // SELL side, the order will sell as much BTC needed to receive quoteOrderQty USDT.
-      if (quantity == null) throw ArgumentError.notNull('quantity');
-      if (quoteOrderQty == null) throw ArgumentError.notNull('quoteOrderQty');
-    }
-    if (OrderType.stopLoss == type) {
-      // This will execute a MARKET order when the stopPrice is reached.
-      if (quantity == null) throw ArgumentError.notNull('price');
-      if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
-    }
-    if (OrderType.stopLossLimit == type) {
-      if (quantity == null) throw ArgumentError.notNull('quantity');
-      if (price == null) throw ArgumentError.notNull('price');
-      if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
-      if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
-    }
-    if (OrderType.takeProfit == type) {
-      // This will execute a MARKET order when the stopPrice is reached.
-      if (quantity == null) throw ArgumentError.notNull('price');
-      if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
-    }
-    if (OrderType.takeProfitLimit == type) {
-      if (quantity == null) throw ArgumentError.notNull('quantity');
-      if (price == null) throw ArgumentError.notNull('price');
-      if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
-      if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
-    }
-    if (OrderType.limitMaker == type) {
-      // This is a LIMIT order that will be rejected if the order immediately matches and trades as a taker.
-      // This is also known as a POST-ONLY order.
-      if (quantity == null) throw ArgumentError.notNull('quantity');
-      if (price == null) throw ArgumentError.notNull('price');
+    // additional mandatory parameters
+    switch (type) {
+      case OrderType.limit:
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (price == null) throw ArgumentError.notNull('price');
+        if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
+        break;
+      case OrderType.market:
+        // MARKET orders using the quantity field specifies the amount of the base asset the user wants to buy or sell at the market price.
+        // E.g. MARKET order on BTCUSDT will specify how much BTC the user is buying or selling.
+        //
+        // MARKET orders using quoteOrderQty specifies the amount the user wants to spend (when buying) or receive (when selling)
+        // the quote asset; the correct quantity will be determined based on the market liquidity and quoteOrderQty.
+        //
+        // E.g. Using the symbol BTCUSDT:
+        // BUY side, the order will buy as many BTC as quoteOrderQty USDT can.
+        // SELL side, the order will sell as much BTC needed to receive quoteOrderQty USDT.
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (quoteOrderQty == null) throw ArgumentError.notNull('quoteOrderQty');
+        break;
+      case OrderType.stopLoss:
+        // This will execute a MARKET order when the stopPrice is reached.
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+        break;
+      case OrderType.stopLossLimit:
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (price == null) throw ArgumentError.notNull('price');
+        if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+        if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
+        break;
+      case OrderType.takeProfit:
+        // This will execute a MARKET order when the stopPrice is reached.
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+        break;
+      case OrderType.takeProfitLimit:
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (price == null) throw ArgumentError.notNull('price');
+        if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+        if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
+        break;
+      case OrderType.limitMaker:
+        // This is a LIMIT order that will be rejected if the order immediately matches and trades as a taker.
+        // This is also known as a POST-ONLY order.
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (price == null) throw ArgumentError.notNull('price');
+        break;
     }
     if (null != icebergQty) {
       timeInForce = TimeInForce.gtc;
     }
-    final result = await _sendRequest(baseUri, '/order');
+    final queryParameters = <String, dynamic>{
+      'symbol': symbol,
+      'side': side.value,
+      'type': type.value,
+      'quantity': quantity,
+    };
+    if (null != timeInForce) queryParameters['timeInForce'] = timeInForce.value;
+    if (null != quoteOrderQty) queryParameters['quoteOrderQty'] = quoteOrderQty;
+    final result = await _sendRequest(
+      baseUri,
+      '/order',
+      queryParameters: queryParameters,
+    );
     return BinanceTradeResponse.fromJson(result);
   }
 }
