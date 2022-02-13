@@ -1,6 +1,7 @@
 import 'package:test/test.dart';
 
 import 'package:dashchain/dashchain.dart';
+
 import 'mock_clients.dart';
 
 // ignore_for_file: avoid_print
@@ -17,6 +18,83 @@ void main() {
       _api.dispose();
     });
 
+    group('BinanceRestApi internal methods tests', () {
+      test('invalid request args test', () async {
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test', withKey: true);
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test',
+              withSignature: true);
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        _api.dispose();
+        _api.apiClient = okClientButNoJSON;
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        _api.dispose();
+        _api.apiClient = okClientButError;
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('user weight test', () {
+        expect(_api.usedWeight, equals(0));
+        var testResponseHeaders = <String, String>{
+          'unexpectedKey': 'wont update user weight'
+        };
+        _api.maybeUpdateUsedWeight(testResponseHeaders);
+        expect(_api.usedWeight, equals(0));
+        // test increment weight
+        var usedWeight = 10;
+        testResponseHeaders[xMbxUsedWeightHeader] = '$usedWeight';
+        _api.maybeUpdateUsedWeight(testResponseHeaders);
+        expect(_api.usedWeight, equals(usedWeight));
+        // test decrement weight
+        usedWeight = 1;
+        testResponseHeaders[xMbxUsedWeightHeader] = '$usedWeight';
+        _api.maybeUpdateUsedWeight(testResponseHeaders);
+        expect(_api.usedWeight, equals(usedWeight));
+      });
+      test('signature test', () {
+        _api.apiSecretKey = 'P@ssw0rd';
+        final testUri = Uri.https(defaultUri, '$apiPath/test', {
+          'test': '1',
+          'total': 'params',
+          'isFlaky': 'false',
+        });
+        final totalParams = testUri.query;
+        print('signature input: $totalParams');
+        final signature = _api.computeSignature(testUri.query);
+        final hexPattern = RegExp(r'([0-9A-z]){64}');
+        expect(hexPattern.hasMatch(signature), true);
+      });
+    });
     group('/ping tests', () {
       test('OK ping should return true', () async {
         _api.dispose();
@@ -31,7 +109,6 @@ void main() {
         expect(ping, isFalse);
       });
     });
-
     group('getFallbackEndpoint tests', () {
       test('should return first URI', () async {
         _api.dispose();
@@ -225,17 +302,12 @@ void main() {
           print(e);
           expect(e, isA<ArgumentError>());
         }
-        try {
-          final aggTrades = await _api.aggregatedTrades(
-            symbol: 'BNBETH',
-            startTime: midnight,
-            endtime: midnightPlusHalfHour,
-          );
-          expect(aggTrades, isA<List<BinanceAggregatedTrade>>());
-        } catch (e) {
-          print(e);
-          fail('should not have thrown an Exception');
-        }
+        final aggTrades = await _api.aggregatedTrades(
+          symbol: 'BNBETH',
+          startTime: midnight,
+          endtime: midnightPlusHalfHour,
+        );
+        expect(aggTrades, isA<List<BinanceAggregatedTrade>>());
       });
       test('bad format aggTrades should throw', () async {
         _api.dispose();

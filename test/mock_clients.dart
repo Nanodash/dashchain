@@ -14,6 +14,22 @@ late final MockClient okClient =
           reasonPhrase: 'okClient',
         )));
 
+/// simple OK client but with wrong JSON
+late final MockClient okClientButNoJSON =
+    MockClient((Request request) => Future.value(Response(
+          'i am not a JSON String',
+          200,
+          reasonPhrase: 'okClientButNoJSON',
+        )));
+
+/// simple OK client but with an error response is answered
+late final MockClient okClientButError =
+    MockClient((Request request) => Future.value(Response(
+          jsonEncode({"code": -1000, "msg": "testing err response."}),
+          200,
+          reasonPhrase: 'okClientButError',
+        )));
+
 /// simple KO client
 late final MockClient koClient =
     MockClient((Request request) => Future.value(Response(
