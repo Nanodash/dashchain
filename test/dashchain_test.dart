@@ -558,5 +558,50 @@ void main() {
         }
       });
     });
+    group('order tests', () {
+      test('OK sendOrder should return BinanceTradeResponse object', () async {
+        _api.dispose();
+        _api.apiClient = tradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        // test ack response
+        var orderResponse = await _api.sendOrder(
+          symbol: 'BNBETH',
+          quantity: 1,
+          price: 0.5,
+          newOrderRespType: OrderResponseType.ack,
+        );
+        expect(orderResponse, isA<BinanceTradeResponse>());
+        // test result response
+        orderResponse = await _api.sendOrder(
+          symbol: 'BNBETH',
+          quantity: 1,
+          price: 0.5,
+          newOrderRespType: OrderResponseType.result,
+        );
+        expect(orderResponse, isA<BinanceTradeResponse>());
+        // test full response
+        orderResponse = await _api.sendOrder(
+          symbol: 'BNBETH',
+          quantity: 1,
+          price: 0.5,
+          newOrderRespType: OrderResponseType.full,
+        );
+        expect(orderResponse, isA<BinanceTradeResponse>());
+      });
+      test('KO sendOrder should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          await _api.sendOrder(symbol: 'BNBETH', quantity: 1, price: 0.5);
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
   });
 }

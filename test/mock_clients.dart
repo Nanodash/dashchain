@@ -386,3 +386,127 @@ late final MockClient bookTickerOkClient2 = MockClient(
     ),
   ),
 );
+
+late final MockClient tradeOrderOkClient = MockClient(
+  (Request request) {
+    Response mockResponse;
+    Map<String, dynamic> mockResponseData;
+    String orderResponseTypeString =
+        request.url.queryParameters['newOrderRespType']!;
+    OrderResponseType? orderResponseType;
+    if (orderResponseTypeString == OrderResponseType.ack.value) {
+      orderResponseType = OrderResponseType.ack;
+    } else if (orderResponseTypeString == OrderResponseType.result.value) {
+      orderResponseType = OrderResponseType.result;
+    } else if (orderResponseTypeString == OrderResponseType.full.value) {
+      orderResponseType = OrderResponseType.full;
+    }
+    if (orderResponseType != null) {
+      switch (orderResponseType) {
+        case OrderResponseType.ack:
+          mockResponseData = {
+            "symbol": "BTCUSDT",
+            "orderId": 28,
+            "orderListId": -1, //Unless OCO, value will be -1
+            "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+            "transactTime": 1507725176595
+          };
+          mockResponse = Response(
+            jsonEncode(mockResponseData),
+            200,
+            reasonPhrase: 'ackTradeOrderOkClient',
+          );
+          break;
+        case OrderResponseType.result:
+          mockResponseData = {
+            "symbol": "BTCUSDT",
+            "orderId": 28,
+            "orderListId": -1, //Unless OCO, value will be -1
+            "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+            "transactTime": 1507725176595,
+            "price": "0.00000000",
+            "origQty": "10.00000000",
+            "executedQty": "10.00000000",
+            "cummulativeQuoteQty": "10.00000000",
+            "status": "FILLED",
+            "timeInForce": "GTC",
+            "type": "MARKET",
+            "side": "SELL"
+          };
+          mockResponse = Response(
+            jsonEncode(mockResponseData),
+            200,
+            reasonPhrase: 'resultTradeOrderOkClient',
+          );
+          break;
+        case OrderResponseType.full:
+          mockResponseData = {
+            "symbol": "BTCUSDT",
+            "orderId": 28,
+            "orderListId": -1, //Unless OCO, value will be -1
+            "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+            "transactTime": 1507725176595,
+            "price": "0.00000000",
+            "origQty": "10.00000000",
+            "executedQty": "10.00000000",
+            "cummulativeQuoteQty": "10.00000000",
+            "status": "FILLED",
+            "timeInForce": "GTC",
+            "type": "MARKET",
+            "side": "SELL",
+            "fills": [
+              {
+                "price": "4000.00000000",
+                "qty": "1.00000000",
+                "commission": "4.00000000",
+                "commissionAsset": "USDT",
+                "tradeId": 56
+              },
+              {
+                "price": "3999.00000000",
+                "qty": "5.00000000",
+                "commission": "19.99500000",
+                "commissionAsset": "USDT",
+                "tradeId": 57
+              },
+              {
+                "price": "3998.00000000",
+                "qty": "2.00000000",
+                "commission": "7.99600000",
+                "commissionAsset": "USDT",
+                "tradeId": 58
+              },
+              {
+                "price": "3997.00000000",
+                "qty": "1.00000000",
+                "commission": "3.99700000",
+                "commissionAsset": "USDT",
+                "tradeId": 59
+              },
+              {
+                "price": "3995.00000000",
+                "qty": "1.00000000",
+                "commission": "3.99500000",
+                "commissionAsset": "USDT",
+                "tradeId": 60
+              }
+            ]
+          };
+          mockResponse = Response(
+            jsonEncode(mockResponseData),
+            200,
+            reasonPhrase: 'fullTradeOrderOkClient',
+          );
+          break;
+      }
+    } else {
+      mockResponseData = {};
+      mockResponse = Response(
+        jsonEncode(mockResponseData),
+        400,
+        reasonPhrase: 'unknown order response type string',
+      );
+    }
+    return Future.value(mockResponse);
+  },
+);

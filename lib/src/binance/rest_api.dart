@@ -606,7 +606,7 @@ class BinanceRestApi {
   ///
   /// Query weight : 1
   ///
-  /// Returns a [BinanceTradeResponse] based on the given [orderResponseType].
+  /// Returns a [BinanceTradeResponse] based on the given [OrderResponseType].
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   ///
@@ -621,7 +621,7 @@ class BinanceRestApi {
     required String symbol,
     Side side = Side.buy,
     OrderType type = OrderType.limit,
-    TimeInForce? timeInForce,
+    TimeInForce timeInForce = TimeInForce.gtc,
     double? quantity,
     double? quoteOrderQty,
     double? price,
@@ -636,7 +636,11 @@ class BinanceRestApi {
 
     /// Used with `LIMIT`, `STOP_LOSS_LIMIT`, and `TAKE_PROFIT_LIMIT to create an iceberg order.
     double? icebergQty,
-    OrderResponseType? orderResponseType,
+
+    /// Set the response JSON. ACK, RESULT, or FULL; MARKET and LIMIT order types default to FULL, all other orders default to ACK.
+    OrderResponseType? newOrderRespType,
+
+    /// The value cannot be greater than 60000
     int recvWindow = 5000,
   }) async {
     const kMinRecvWindow = 0;
@@ -707,12 +711,12 @@ class BinanceRestApi {
       newClientOrderId,
       stopPrice,
       icebergQty,
-      orderResponseType,
+      newOrderRespType,
     );
     // send request
     final result = await sendRequest(
       baseUri,
-      '/order',
+      tradeOrderPath,
       queryParameters: queryParameters,
       requestMethod: RequestMethod.post,
       withSignature: true,
@@ -721,18 +725,19 @@ class BinanceRestApi {
   }
 
   Map<String, dynamic> _buildTradeOrderParams(
-      String symbol,
-      Side side,
-      OrderType type,
-      double quantity,
-      int recvWindow,
-      TimeInForce? timeInForce,
-      double? quoteOrderQty,
-      double? price,
-      String? newClientOrderId,
-      double? stopPrice,
-      double? icebergQty,
-      OrderResponseType? orderResponseType) {
+    String symbol,
+    Side side,
+    OrderType type,
+    double quantity,
+    int recvWindow,
+    TimeInForce? timeInForce,
+    double? quoteOrderQty,
+    double? price,
+    String? newClientOrderId,
+    double? stopPrice,
+    double? icebergQty,
+    OrderResponseType? newOrderRespType,
+  ) {
     final queryParameters = <String, dynamic>{
       'symbol': symbol,
       'side': side.value,
@@ -759,8 +764,8 @@ class BinanceRestApi {
       queryParameters['iceberQty'] = '$icebergQty';
       queryParameters['timeInForce'] = TimeInForce.gtc;
     }
-    if (null != orderResponseType) {
-      queryParameters['orderResponseType'] = orderResponseType.value;
+    if (null != newOrderRespType) {
+      queryParameters['newOrderRespType'] = newOrderRespType.value;
     }
     return queryParameters;
   }
