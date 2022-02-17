@@ -10,12 +10,22 @@ import 'package:dashchain/dashchain.dart';
 class BinanceRestApi {
   static BinanceRestApi? _instance;
 
-  factory BinanceRestApi() => _instance ?? BinanceRestApi._();
-  BinanceRestApi._() {
+  BinanceRestApi._(
+    this.apiKey,
+    this.apiSecretKey,
+  ) {
     _apiClient = http.Client();
     _instance = this;
     _log('API manager initialized !');
   }
+
+  factory BinanceRestApi() => _instance ?? BinanceRestApi._(null, null);
+
+  factory BinanceRestApi.withKeys({
+    required String apiKey,
+    required String apiSecretKey,
+  }) =>
+      _instance ?? BinanceRestApi._(apiKey, apiSecretKey);
 
   /// Will dispose any resources used by this class
   void dispose() => _apiClient.close();
@@ -64,11 +74,6 @@ class BinanceRestApi {
     bool withSignature = false,
   }) async {
     if (withSignature) withKey = true;
-    Uri uri = Uri.https(
-      baseUri,
-      '$apiPath$resourcePath',
-      queryParameters,
-    );
     Map<String, String>? headers;
     if (withKey) {
       if (null == apiKey) {
@@ -76,19 +81,20 @@ class BinanceRestApi {
       }
       headers = {xMbxApiKeyHeader: apiKey!};
     }
-    queryParameters ??= <String, dynamic>{};
     if (withSignature) {
       if (null == apiSecretKey) {
         throw const BinanceApiError(-1, 'apiSecretKey must not be null');
       }
+      queryParameters ??= <String, dynamic>{};
       queryParameters['timestamp'] = '${DateTime.now().millisecondsSinceEpoch}';
-      uri = Uri.https(
-        baseUri,
-        '$apiPath$resourcePath',
-        queryParameters,
-      );
-      queryParameters['signature'] = computeSignature(uri.query);
+      String totalParams = Uri.https('', '', queryParameters).query;
+      queryParameters['signature'] = computeSignature(totalParams);
     }
+    final uri = Uri.https(
+      baseUri,
+      '$apiPath$resourcePath',
+      queryParameters,
+    );
     http.Response response;
     _log('${requestMethod.value} $uri');
     _restartStopwatch();
@@ -146,6 +152,7 @@ class BinanceRestApi {
 
   @visibleForTesting
   String computeSignature(String totalParams) {
+    _log('computeSignature($totalParams)');
     List<int> hmacInput = utf8.encode(apiSecretKey!);
     final hmacSha256 = Hmac(sha256, hmacInput); // HMAC-SHA256
     final totalParamsBytes = utf8.encode(totalParams);
@@ -654,7 +661,6 @@ class BinanceRestApi {
       case OrderType.limit:
         if (quantity == null) throw ArgumentError.notNull('quantity');
         if (price == null) throw ArgumentError.notNull('price');
-        if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
         break;
       case OrderType.market:
         // MARKET orders using the quantity field specifies the amount of the base asset the user wants to buy or sell at the market price.
@@ -678,7 +684,6 @@ class BinanceRestApi {
         if (quantity == null) throw ArgumentError.notNull('quantity');
         if (price == null) throw ArgumentError.notNull('price');
         if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
-        if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
         break;
       case OrderType.takeProfit:
         // This will execute a MARKET order when the stopPrice is reached.
@@ -689,7 +694,6 @@ class BinanceRestApi {
         if (quantity == null) throw ArgumentError.notNull('quantity');
         if (price == null) throw ArgumentError.notNull('price');
         if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
-        if (timeInForce == null) throw ArgumentError.notNull('timeInForce');
         break;
       case OrderType.limitMaker:
         // This is a LIMIT order that will be rejected if the order immediately matches and trades as a taker.
@@ -730,7 +734,7 @@ class BinanceRestApi {
     OrderType type,
     double quantity,
     int recvWindow,
-    TimeInForce? timeInForce,
+    TimeInForce timeInForce,
     double? quoteOrderQty,
     double? price,
     String? newClientOrderId,
@@ -744,10 +748,8 @@ class BinanceRestApi {
       'type': type.value,
       'quantity': '$quantity',
       'recvWindow': '$recvWindow',
+      'timeInForce': timeInForce.value,
     };
-    if (null != timeInForce) {
-      queryParameters['timeInForce'] = timeInForce.value;
-    }
     if (null != quoteOrderQty) {
       queryParameters['quoteOrderQty'] = '$quoteOrderQty';
     }

@@ -1,7 +1,6 @@
 import 'package:test/test.dart';
 
 import 'package:dashchain/dashchain.dart';
-
 import 'mock_clients.dart';
 
 // ignore_for_file: avoid_print
@@ -82,17 +81,18 @@ void main() {
         expect(_api.usedWeight, equals(usedWeight));
       });
       test('signature test', () {
-        _api.apiSecretKey = 'P@ssw0rd';
-        final testUri = Uri.https(defaultUri, '$apiPath/test', {
-          'test': '1',
-          'total': 'params',
-          'isFlaky': 'false',
-        });
-        final totalParams = testUri.query;
+        // values from https://github.com/binance/binance-signature-examples#how-it-works
+        const totalParams =
+            'symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559';
+        const expectedSignature =
+            'c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71';
+        _api.apiSecretKey =
+            'NhqPtmdSJYdKjVHjA7PZj4Mge3R5YNiP1e3UZjInClVN65XAbvqqM6A7H5fATj0j';
         print('signature input: $totalParams');
-        final signature = _api.computeSignature(testUri.query);
+        final signature = _api.computeSignature(totalParams);
         final hexPattern = RegExp(r'([0-9A-z]){64}');
         expect(hexPattern.hasMatch(signature), true);
+        expect(signature, equals(expectedSignature));
       });
     });
     group('/ping tests', () {
