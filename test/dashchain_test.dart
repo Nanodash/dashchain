@@ -17,6 +17,84 @@ void main() {
       _api.dispose();
     });
 
+    group('BinanceRestApi internal methods tests', () {
+      test('invalid request args test', () async {
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test', withKey: true);
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test',
+              withSignature: true);
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        _api.dispose();
+        _api.apiClient = okClientButNoJSON;
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        _api.dispose();
+        _api.apiClient = okClientButError;
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+        _api.dispose();
+        _api.apiClient = koClient;
+        try {
+          await _api.sendRequest(defaultUri, '$apiPath/test');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('user weight test', () {
+        expect(_api.usedWeight, equals(0));
+        var testResponseHeaders = <String, String>{
+          'unexpectedKey': 'wont update user weight'
+        };
+        _api.maybeUpdateUsedWeight(testResponseHeaders);
+        expect(_api.usedWeight, equals(0));
+        // test increment weight
+        var usedWeight = 10;
+        testResponseHeaders[xMbxUsedWeightHeader] = '$usedWeight';
+        _api.maybeUpdateUsedWeight(testResponseHeaders);
+        expect(_api.usedWeight, equals(usedWeight));
+        // test decrement weight
+        usedWeight = 1;
+        testResponseHeaders[xMbxUsedWeightHeader] = '$usedWeight';
+        _api.maybeUpdateUsedWeight(testResponseHeaders);
+        expect(_api.usedWeight, equals(usedWeight));
+      });
+      test('signature test', () {
+        // values from https://github.com/binance/binance-signature-examples#how-it-works
+        const totalParams =
+            'symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559';
+        const expectedSignature =
+            'c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71';
+        _api.apiSecretKey =
+            'NhqPtmdSJYdKjVHjA7PZj4Mge3R5YNiP1e3UZjInClVN65XAbvqqM6A7H5fATj0j';
+        print('signature input: $totalParams');
+        final signature = _api.computeSignature(totalParams);
+        final hexPattern = RegExp(r'([0-9A-z]){64}');
+        expect(hexPattern.hasMatch(signature), true);
+        expect(signature, equals(expectedSignature));
+      });
+    });
     group('/ping tests', () {
       test('OK ping should return true', () async {
         _api.dispose();
@@ -31,7 +109,6 @@ void main() {
         expect(ping, isFalse);
       });
     });
-
     group('getFallbackEndpoint tests', () {
       test('should return first URI', () async {
         _api.dispose();
@@ -158,15 +235,16 @@ void main() {
       test('OK historicalTrades should return BinanceTrade object', () async {
         _api.dispose();
         _api.apiClient = tradesOkClient;
-        final historicalTrades =
-            await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+        _api.apiKey ??= 'apiKey';
+        final historicalTrades = await _api.historicalTrades(symbol: 'BNBETH');
         expect(historicalTrades, isA<List<BinanceTrade>>());
       });
       test('bad format historicalTrades should throw', () async {
         _api.dispose();
         _api.apiClient = notAListClient;
+        _api.apiKey ??= 'apiKey';
         try {
-          await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+          await _api.historicalTrades(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
@@ -176,8 +254,21 @@ void main() {
       test('KO historicalTrades should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
+        _api.apiKey ??= 'apiKey';
         try {
-          await _api.historicalTrades(symbol: 'BNBETH', apiKey: 'apiKey');
+          await _api.historicalTrades(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+      test('no API key historicalTrades should throw', () async {
+        _api.dispose();
+        _api.apiClient = okClient;
+        _api.apiKey = null;
+        try {
+          await _api.historicalTrades(symbol: 'BNBETH');
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
@@ -211,17 +302,12 @@ void main() {
           print(e);
           expect(e, isA<ArgumentError>());
         }
-        try {
-          final aggTrades = await _api.aggregatedTrades(
-            symbol: 'BNBETH',
-            startTime: midnight,
-            endtime: midnightPlusHalfHour,
-          );
-          expect(aggTrades, isA<List<BinanceAggregatedTrade>>());
-        } catch (e) {
-          print(e);
-          fail('should not have thrown an Exception');
-        }
+        final aggTrades = await _api.aggregatedTrades(
+          symbol: 'BNBETH',
+          startTime: midnight,
+          endtime: midnightPlusHalfHour,
+        );
+        expect(aggTrades, isA<List<BinanceAggregatedTrade>>());
       });
       test('bad format aggTrades should throw', () async {
         _api.dispose();
@@ -465,6 +551,281 @@ void main() {
         _api.apiClient = koClient;
         try {
           await _api.bookTicker(symbol: 'BNBETH');
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+        }
+      });
+    });
+    group('order tests', () {
+      test('OK sendOrder should return BinanceTradeResponse object', () async {
+        _api.dispose();
+        _api.apiClient = tradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        // test ack response
+        var orderResponse = await _api.sendOrder(
+          symbol: 'BNBETH',
+          quantity: 1,
+          price: 0.5,
+          newOrderRespType: OrderResponseType.ack,
+        );
+        expect(orderResponse, isA<BinanceTradeResponse>());
+        // test result response
+        orderResponse = await _api.sendOrder(
+          symbol: 'BNBETH',
+          quantity: 1,
+          price: 0.5,
+          newOrderRespType: OrderResponseType.result,
+        );
+        expect(orderResponse, isA<BinanceTradeResponse>());
+        // test full response
+        orderResponse = await _api.sendOrder(
+          symbol: 'BNBETH',
+          quantity: 1,
+          price: 0.5,
+          newOrderRespType: OrderResponseType.full,
+        );
+        expect(orderResponse, isA<BinanceTradeResponse>());
+      });
+      test('sendOrder may have additional required parameters', () async {
+        _api.dispose();
+        _api.apiClient = tradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        // LIMIT order
+        var orderType = OrderType.limit;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing price
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // MARKET order
+        orderType = OrderType.market;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing quoteOrderQty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // STOP_LOSS order
+        orderType = OrderType.stopLoss;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing stopPrice
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // STOP_LOSS_LIMIT order
+        orderType = OrderType.stopLossLimit;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing price
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing stopPrice
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+            price: 100,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // TAKE_PROFIT order
+        orderType = OrderType.takeProfit;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing stopPrice
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // TAKE_PROFIT_LIMIT order
+        orderType = OrderType.takeProfitLimit;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing price
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing stopPrice
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+            price: 100,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // LIMIT_MAKER order
+        orderType = OrderType.limitMaker;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing price
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+      });
+      test('sendOrder query parameters test', () {
+        final queryParams = _api.buildTradeOrderParams(
+            'test',
+            Side.buy,
+            OrderType.limit,
+            1,
+            0,
+            TimeInForce.fok, // should be overriden
+            null,
+            null,
+            null,
+            null,
+            0.1, // non-null icebergQty
+            null);
+        expect(queryParams, containsPair('timeInForce', TimeInForce.gtc.value));
+      });
+      test('KO sendOrder should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          await _api.sendOrder(symbol: 'BNBETH', quantity: 1, price: 0.5);
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
