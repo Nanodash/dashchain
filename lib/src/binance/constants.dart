@@ -52,4 +52,7 @@ const String priceTickerPath = '/ticker/price';
 
 /// The endpoint to get the book ticker of symbol(s).
 const String bookTickerPath = '/ticker/bookTicker';
+
+/// The endpoint to send a trade order.
+const String tradeOrderPath = '/order';
 // -----------------------------------

@@ -1,3 +1,7 @@
+## 0.9.0
+
+- integrate `/order` endpoint
+
 ## 0.8.0
 
 - integrate `/ticker/bookTicker` endpoint

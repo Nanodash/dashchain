@@ -9,4 +9,6 @@ export 'symbol/symbol.dart';
 export 'tickers/book_ticker.dart';
 export 'tickers/day_ticker.dart';
 export 'tickers/price_ticker.dart';
+export 'trade/trade_response.dart';
+export 'trade/order_fill.dart';
 export 'trade/trade.dart';

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:dashchain/dashchain.dart';
@@ -8,12 +10,22 @@ import 'package:dashchain/dashchain.dart';
 class BinanceRestApi {
   static BinanceRestApi? _instance;
 
-  factory BinanceRestApi() => _instance ?? BinanceRestApi._();
-  BinanceRestApi._() {
+  BinanceRestApi._(
+    this.apiKey,
+    this.apiSecretKey,
+  ) {
     _apiClient = http.Client();
     _instance = this;
     _log('API manager initialized !');
   }
+
+  factory BinanceRestApi() => _instance ?? BinanceRestApi._(null, null);
+
+  factory BinanceRestApi.withKeys({
+    required String apiKey,
+    required String apiSecretKey,
+  }) =>
+      _instance ?? BinanceRestApi._(apiKey, apiSecretKey);
 
   /// Will dispose any resources used by this class
   void dispose() => _apiClient.close();
@@ -23,6 +35,12 @@ class BinanceRestApi {
 
   /// Exposing setter for mocking capabilities in unit tests
   set apiClient(http.Client client) => _apiClient = client;
+
+  /// The user's API key
+  String? apiKey;
+
+  /// The user's API **secret** key
+  String? apiSecretKey;
 
   /// This variable will track the current IP used weight, that _- if high enough -_ may mean that too many requests has been done.
   ///
@@ -46,31 +64,68 @@ class BinanceRestApi {
   /// Will build an [Uri] based on params and send a request via the [_apiClient].
   ///
   /// If any errors occurs (HTTP code 4XX, unexpected body format, ...), it will throw a [BinanceApiError].
-  Future<dynamic> _sendRequest(
+  @visibleForTesting
+  Future<dynamic> sendRequest(
     String baseUri,
     String resourcePath, {
-    Map<String, String>? headers,
-    Map<String, String>? queryParameters,
+    RequestMethod requestMethod = RequestMethod.get,
+    Map<String, dynamic>? queryParameters,
+    bool withKey = false,
+    bool withSignature = false,
   }) async {
+    if (withSignature) withKey = true;
+    Map<String, String>? headers;
+    if (withKey) {
+      if (null == apiKey) {
+        throw const BinanceApiError(-1, 'apiKey must not be null');
+      }
+      headers = {xMbxApiKeyHeader: apiKey!};
+    }
+    if (withSignature) {
+      if (null == apiSecretKey) {
+        throw const BinanceApiError(-1, 'apiSecretKey must not be null');
+      }
+      queryParameters ??= <String, dynamic>{};
+      queryParameters['timestamp'] = '${DateTime.now().millisecondsSinceEpoch}';
+      String totalParams = Uri.https('', '', queryParameters).query;
+      queryParameters['signature'] = computeSignature(totalParams);
+    }
     final uri = Uri.https(
       baseUri,
       '$apiPath$resourcePath',
       queryParameters,
     );
-    _log('GET $uri');
+    http.Response response;
+    _log('${requestMethod.value} $uri');
     _restartStopwatch();
-    final response = await _apiClient.get(uri, headers: headers);
+    switch (requestMethod) {
+      case RequestMethod.get:
+        response = await _apiClient.get(uri, headers: headers);
+        break;
+      case RequestMethod.post:
+        response = await _apiClient.post(uri, headers: headers);
+        break;
+    }
     _log('received answer after ${_stopwatch.elapsedMilliseconds}ms.');
     switch (response.statusCode) {
       case 200:
-        _maybeUpdateUsedWeight(response.headers);
+        maybeUpdateUsedWeight(response.headers);
+        dynamic result;
         try {
-          return jsonDecode(response.body);
+          result = jsonDecode(response.body);
         } on FormatException catch (e) {
           final error = BinanceApiError(-1, e);
           _log('caught error during request...$error');
           throw error;
         }
+        // sometimes the response is an error (https://github.com/binance/binance-spot-api-docs/blob/master/errors.md)
+        if (result is Map && result.containsKey('code')) {
+          final code = result['code'] as int;
+          final error = BinanceApiError(code, result['msg']);
+          _log('caught error during request...$error');
+          throw error;
+        }
+        return result;
       default:
         final error =
             BinanceApiError(response.statusCode, response.reasonPhrase);
@@ -80,7 +135,8 @@ class BinanceRestApi {
   }
 
   /// Will check response's headers to update the current requests quota.
-  void _maybeUpdateUsedWeight(Map<String, String> headers) {
+  @visibleForTesting
+  void maybeUpdateUsedWeight(Map<String, String> headers) {
     if (headers.containsKey(xMbxUsedWeightHeader)) {
       final weightAsString = headers[xMbxUsedWeightHeader]!;
       try {
@@ -92,6 +148,17 @@ class BinanceRestApi {
     } else {
       _log('used weight header not found');
     }
+  }
+
+  @visibleForTesting
+  String computeSignature(String totalParams) {
+    _log('computeSignature($totalParams)');
+    List<int> hmacInput = utf8.encode(apiSecretKey!);
+    final hmacSha256 = Hmac(sha256, hmacInput); // HMAC-SHA256
+    final totalParamsBytes = utf8.encode(totalParams);
+    final signature = hmacSha256.convert(totalParamsBytes);
+    _log('signing request with: $signature');
+    return '$signature';
   }
 
   /// As per Binance's docs, there are 3 more clusters for API calls with names `api1`, `api2` and `api3`.
@@ -132,7 +199,7 @@ class BinanceRestApi {
   /// This private method helps to reuse ping in [getFallbackUri].
   Future<bool> _ping(String baseUri) async {
     try {
-      await _sendRequest(baseUri, pingPath);
+      await sendRequest(baseUri, pingPath);
       return true;
     } on BinanceApiError catch (_) {
       return false;
@@ -149,7 +216,7 @@ class BinanceRestApi {
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   Future<int> checkApiTime({String baseUri = defaultUri}) async =>
-      (await _sendRequest(baseUri, timePath))['serverTime'];
+      (await sendRequest(baseUri, timePath))['serverTime'];
 
   /// Will get by default all Binance's listed symbols using `/exchangeInfo` endpoint.
   /// If [symbols] is provided, will append query parameter to the GET request in order to filter the result.
@@ -165,7 +232,7 @@ class BinanceRestApi {
     String baseUri = defaultUri,
     List<String> symbols = const <String>[],
   }) async =>
-      BinanceExchangeInfo.fromJson(await _sendRequest(
+      BinanceExchangeInfo.fromJson(await sendRequest(
         baseUri,
         exchangeInfoPath,
         queryParameters: _buildExchangeInfoParams(symbols),
@@ -223,7 +290,7 @@ class BinanceRestApi {
     required String symbol,
     int limit = 100,
   }) async =>
-      BinanceOrderBook.fromJson(await _sendRequest(
+      BinanceOrderBook.fromJson(await sendRequest(
         baseUri,
         orderBookPath,
         queryParameters: {'symbol': symbol, 'limit': '$limit'},
@@ -244,7 +311,7 @@ class BinanceRestApi {
     required String symbol,
     int limit = 100,
   }) async {
-    final trades = await _sendRequest(
+    final trades = await sendRequest(
       baseUri,
       tradesPath,
       queryParameters: {'symbol': symbol, 'limit': '$limit'},
@@ -273,7 +340,6 @@ class BinanceRestApi {
   Future<List<BinanceTrade>> historicalTrades({
     String baseUri = defaultUri,
     required String symbol,
-    required String apiKey,
     int limit = 100,
     int? fromId,
   }) async {
@@ -281,11 +347,11 @@ class BinanceRestApi {
     if (fromId != null) {
       params['fromId'] = '$fromId';
     }
-    final historicalTrades = await _sendRequest(
+    final historicalTrades = await sendRequest(
       baseUri,
       historicalTradesPath,
-      headers: {xMbxApiKeyHeader: apiKey},
       queryParameters: params,
+      withKey: true,
     );
     if (historicalTrades is List) {
       return List<BinanceTrade>.from(
@@ -329,7 +395,7 @@ class BinanceRestApi {
       }
       params['startTime'] = '${startTime.millisecondsSinceEpoch}';
     }
-    final aggregatedTrades = await _sendRequest(
+    final aggregatedTrades = await sendRequest(
       baseUri,
       aggregatedTradesPath,
       queryParameters: params,
@@ -376,7 +442,7 @@ class BinanceRestApi {
       }
       params['endTime'] = '${endtime.millisecondsSinceEpoch}';
     }
-    final response = await _sendRequest(
+    final response = await sendRequest(
       baseUri,
       klinesPath,
       queryParameters: params,
@@ -409,7 +475,7 @@ class BinanceRestApi {
     String baseUri = defaultUri,
     required String symbol,
   }) async =>
-      BinanceAveragePrice.fromJson(await _sendRequest(
+      BinanceAveragePrice.fromJson(await sendRequest(
         baseUri,
         avgPricePath,
         queryParameters: {'symbol': symbol},
@@ -428,7 +494,7 @@ class BinanceRestApi {
     String baseUri = defaultUri,
     String? symbol,
   }) async {
-    final response = await _sendRequest(
+    final response = await sendRequest(
       baseUri,
       dayTickerPath,
       queryParameters: symbol != null ? {'symbol': symbol} : null,
@@ -470,7 +536,7 @@ class BinanceRestApi {
     String baseUri = defaultUri,
     String? symbol,
   }) async {
-    final response = await _sendRequest(
+    final response = await sendRequest(
       baseUri,
       priceTickerPath,
       queryParameters: symbol != null ? {'symbol': symbol} : null,
@@ -512,7 +578,7 @@ class BinanceRestApi {
     String baseUri = defaultUri,
     String? symbol,
   }) async {
-    final response = await _sendRequest(
+    final response = await sendRequest(
       baseUri,
       bookTickerPath,
       queryParameters: symbol != null ? {'symbol': symbol} : null,
@@ -539,5 +605,171 @@ class BinanceRestApi {
       }
     }
     throw const BinanceApiError(-1, 'unexpected ticker format');
+  }
+
+  /// Will send a trade order to the matching engine.
+  ///
+  /// API Key required : yes (+ signature)
+  ///
+  /// Query weight : 1
+  ///
+  /// Returns a [BinanceTradeResponse] based on the given [OrderResponseType].
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  ///
+  /// Other info from docs :
+  /// _Any `LIMIT` or `LIMIT_MAKER` type order can be made an iceberg order by sending an `icebergQty`.
+  /// Any order with an `icebergQty` **MUST** have `timeInForce` set to `GTC`. (it is done by library)
+  /// `MARKET` orders using `quoteOrderQty` will not break `LOT_SIZE` filter rules; the order will execute a quantity that will have the notional value as close as possible to `quoteOrderQty`. Trigger order price rules against market price for both `MARKET` and `LIMIT` versions:
+  /// Price above market price: `STOP_LOSS` BUY, `TAKE_PROFIT` SELL
+  /// Price below market price: `STOP_LOSS` SELL, `TAKE_PROFIT` BUY_
+  Future<BinanceTradeResponse> sendOrder({
+    String baseUri = defaultUri,
+    required String symbol,
+    Side side = Side.buy,
+    OrderType type = OrderType.limit,
+    TimeInForce timeInForce = TimeInForce.gtc,
+    double? quantity,
+    double? quoteOrderQty,
+    double? price,
+
+    /// A unique id among open orders. Automatically generated if not sent.
+    /// Orders with the same newClientOrderID can be accepted only when the previous one is filled,
+    /// otherwise the order will be rejected.
+    String? newClientOrderId,
+
+    /// Used with `STOP_LOSS`, `STOP_LOSS_LIMIT`, `TAKE_PROFIT`, and `TAKE_PROFIT_LIMIT` orders.
+    double? stopPrice,
+
+    /// Used with `LIMIT`, `STOP_LOSS_LIMIT`, and `TAKE_PROFIT_LIMIT to create an iceberg order.
+    double? icebergQty,
+
+    /// Set the response JSON. ACK, RESULT, or FULL; MARKET and LIMIT order types default to FULL, all other orders default to ACK.
+    OrderResponseType? newOrderRespType,
+
+    /// The value cannot be greater than 60000
+    int recvWindow = 5000,
+  }) async {
+    const kMinRecvWindow = 0;
+    const kMaxRecvWindow = 60000;
+    if (recvWindow < kMinRecvWindow || recvWindow > kMaxRecvWindow) {
+      throw RangeError(
+          'recvWindow should be a positive value less than $kMaxRecvWindow');
+    }
+    // additional mandatory parameters
+    switch (type) {
+      case OrderType.limit:
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (price == null) throw ArgumentError.notNull('price');
+        break;
+      case OrderType.market:
+        // MARKET orders using the quantity field specifies the amount of the base asset the user wants to buy or sell at the market price.
+        // E.g. MARKET order on BTCUSDT will specify how much BTC the user is buying or selling.
+        //
+        // MARKET orders using quoteOrderQty specifies the amount the user wants to spend (when buying) or receive (when selling)
+        // the quote asset; the correct quantity will be determined based on the market liquidity and quoteOrderQty.
+        //
+        // E.g. Using the symbol BTCUSDT:
+        // BUY side, the order will buy as many BTC as quoteOrderQty USDT can.
+        // SELL side, the order will sell as much BTC needed to receive quoteOrderQty USDT.
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (quoteOrderQty == null) throw ArgumentError.notNull('quoteOrderQty');
+        break;
+      case OrderType.stopLoss:
+        // This will execute a MARKET order when the stopPrice is reached.
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+        break;
+      case OrderType.stopLossLimit:
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (price == null) throw ArgumentError.notNull('price');
+        if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+        break;
+      case OrderType.takeProfit:
+        // This will execute a MARKET order when the stopPrice is reached.
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+        break;
+      case OrderType.takeProfitLimit:
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (price == null) throw ArgumentError.notNull('price');
+        if (stopPrice == null) throw ArgumentError.notNull('stopPrice');
+        break;
+      case OrderType.limitMaker:
+        // This is a LIMIT order that will be rejected if the order immediately matches and trades as a taker.
+        // This is also known as a POST-ONLY order.
+        if (quantity == null) throw ArgumentError.notNull('quantity');
+        if (price == null) throw ArgumentError.notNull('price');
+        break;
+    }
+    // build params
+    final queryParameters = buildTradeOrderParams(
+      symbol,
+      side,
+      type,
+      quantity,
+      recvWindow,
+      timeInForce,
+      quoteOrderQty,
+      price,
+      newClientOrderId,
+      stopPrice,
+      icebergQty,
+      newOrderRespType,
+    );
+    // send request
+    final result = await sendRequest(
+      baseUri,
+      tradeOrderPath,
+      queryParameters: queryParameters,
+      requestMethod: RequestMethod.post,
+      withSignature: true,
+    );
+    return BinanceTradeResponse.fromJson(result);
+  }
+
+  @visibleForTesting
+  Map<String, dynamic> buildTradeOrderParams(
+    String symbol,
+    Side side,
+    OrderType type,
+    double quantity,
+    int recvWindow,
+    TimeInForce timeInForce,
+    double? quoteOrderQty,
+    double? price,
+    String? newClientOrderId,
+    double? stopPrice,
+    double? icebergQty,
+    OrderResponseType? newOrderRespType,
+  ) {
+    final queryParameters = <String, dynamic>{
+      'symbol': symbol,
+      'side': side.value,
+      'type': type.value,
+      'quantity': '$quantity',
+      'recvWindow': '$recvWindow',
+      'timeInForce': timeInForce.value,
+    };
+    if (null != quoteOrderQty) {
+      queryParameters['quoteOrderQty'] = '$quoteOrderQty';
+    }
+    if (null != price) {
+      queryParameters['price'] = '$price';
+    }
+    if (null != newClientOrderId) {
+      queryParameters['newClientOrderId'] = newClientOrderId;
+    }
+    if (null != stopPrice) {
+      queryParameters['stopPrice'] = '$stopPrice';
+    }
+    if (null != icebergQty) {
+      queryParameters['iceberQty'] = '$icebergQty';
+      queryParameters['timeInForce'] = TimeInForce.gtc.value;
+    }
+    if (null != newOrderRespType) {
+      queryParameters['newOrderRespType'] = newOrderRespType.value;
+    }
+    return queryParameters;
   }
 }
