@@ -589,6 +589,220 @@ void main() {
         );
         expect(orderResponse, isA<BinanceTradeResponse>());
       });
+      test('sendOrder may have additional required parameters', () async {
+        _api.dispose();
+        _api.apiClient = tradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        // LIMIT order
+        var orderType = OrderType.limit;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing price
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // MARKET order
+        orderType = OrderType.market;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing quoteOrderQty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // STOP_LOSS order
+        orderType = OrderType.stopLoss;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing stopPrice
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // STOP_LOSS_LIMIT order
+        orderType = OrderType.stopLossLimit;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing price
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing stopPrice
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+            price: 100,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // TAKE_PROFIT order
+        orderType = OrderType.takeProfit;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing stopPrice
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // TAKE_PROFIT_LIMIT order
+        orderType = OrderType.takeProfitLimit;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing price
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing stopPrice
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+            price: 100,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        // LIMIT_MAKER order
+        orderType = OrderType.limitMaker;
+        print('${orderType.value} order');
+        try {
+          // missing qty
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // missing price
+          await _api.sendOrder(
+            symbol: 'BNBETH',
+            type: orderType,
+            quantity: 1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+      });
       test('KO sendOrder should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
