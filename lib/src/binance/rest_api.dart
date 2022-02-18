@@ -703,7 +703,7 @@ class BinanceRestApi {
         break;
     }
     // build params
-    final queryParameters = _buildTradeOrderParams(
+    final queryParameters = buildTradeOrderParams(
       symbol,
       side,
       type,
@@ -728,7 +728,8 @@ class BinanceRestApi {
     return BinanceTradeResponse.fromJson(result);
   }
 
-  Map<String, dynamic> _buildTradeOrderParams(
+  @visibleForTesting
+  Map<String, dynamic> buildTradeOrderParams(
     String symbol,
     Side side,
     OrderType type,
@@ -764,7 +765,7 @@ class BinanceRestApi {
     }
     if (null != icebergQty) {
       queryParameters['iceberQty'] = '$icebergQty';
-      queryParameters['timeInForce'] = TimeInForce.gtc;
+      queryParameters['timeInForce'] = TimeInForce.gtc.value;
     }
     if (null != newOrderRespType) {
       queryParameters['newOrderRespType'] = newOrderRespType.value;

@@ -803,6 +803,22 @@ void main() {
           expect(e, isA<ArgumentError>());
         }
       });
+      test('sendOrder query parameters test', () {
+        final queryParams = _api.buildTradeOrderParams(
+            'test',
+            Side.buy,
+            OrderType.limit,
+            1,
+            0,
+            TimeInForce.fok, // should be overriden
+            null,
+            null,
+            null,
+            null,
+            0.1, // non-null icebergQty
+            null);
+        expect(queryParams, containsPair('timeInForce', TimeInForce.gtc.value));
+      });
       test('KO sendOrder should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
