@@ -5,6 +5,24 @@ import 'mock_clients.dart';
 
 // ignore_for_file: avoid_print
 void main() {
+  group('common API', () {
+    test('double.toPrecision test', () {
+      var testDouble = 0.12300456789;
+      var roundedDouble = 0.123;
+      expect(testDouble.toPrecision(3), equals(roundedDouble));
+      roundedDouble += 0.000005;
+      expect(testDouble.toPrecision(6), equals(roundedDouble));
+      testDouble += 0.0004;
+      roundedDouble -= 0.000005;
+      expect(testDouble.toPrecision(3), equals(roundedDouble));
+      testDouble += 0.0001;
+      roundedDouble += 0.001;
+      expect(testDouble.toPrecision(3), equals(roundedDouble));
+      testDouble += 6;
+      roundedDouble += 6;
+      expect(testDouble.toPrecision(3), equals(roundedDouble));
+    });
+  });
   group('Binance REST API', () {
     // the class to be tested
     late final BinanceRestApi _api;
@@ -60,6 +78,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
       test('user weight test', () {
@@ -159,6 +179,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -179,6 +201,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -198,6 +222,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -228,6 +254,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -261,6 +289,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
       test('no API key historicalTrades should throw', () async {
@@ -329,6 +359,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -339,12 +371,32 @@ void main() {
         final klines =
             await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
         expect(klines, isA<List<BinanceKline>>());
+        for (final kline in klines) {
+          final clone = BinanceKline(
+            kline.openTime,
+            kline.openPrice,
+            kline.highPrice,
+            kline.lowPrice,
+            kline.closePrice,
+            kline.volume,
+            kline.closeTime,
+            kline.quoteAssetVolume,
+            kline.trades,
+            kline.takerBuyBaseAssetVolume,
+            kline.takerBuyQuoteAssetVolume,
+            kline.ignore,
+          );
+          print(kline);
+          print(clone);
+          expect(kline, equals(clone));
+          expect(kline.hashCode, equals(clone.hashCode));
+        }
       });
       test('bad format klines should throw', () async {
         _api.dispose();
         _api.apiClient = notAListClient;
         try {
-          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
+          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d3);
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
@@ -353,7 +405,7 @@ void main() {
         _api.dispose();
         _api.apiClient = klinesKoClient;
         try {
-          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
+          await _api.candlestick(symbol: 'BNBETH', interval: Interval.h8);
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
@@ -370,7 +422,7 @@ void main() {
         try {
           await _api.candlestick(
             symbol: 'BNBETH',
-            interval: Interval.d1,
+            interval: Interval.w1,
             startTime: start,
             endtime: end,
           );
@@ -384,11 +436,16 @@ void main() {
         _api.dispose();
         _api.apiClient = koClient;
         try {
-          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
+          await _api.candlestick(
+            symbol: 'BNBETH',
+            interval: Interval.w4, // last enum value for coverage
+          );
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -398,6 +455,8 @@ void main() {
         _api.apiClient = avgPriceOkClient;
         final avgPrice = await _api.averagePrice(symbol: 'BNBETH');
         expect(avgPrice, isA<BinanceAveragePrice>());
+        expect(
+            BinanceAveragePrice.fromJson(avgPrice.toJson()), equals(avgPrice));
       });
       test('KO avgPrice should throw', () async {
         _api.dispose();
@@ -408,6 +467,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -419,6 +480,8 @@ void main() {
         final dayTicker = await _api.dayTicker(symbol: 'BNBETH');
         expect(dayTicker, isA<List<BinanceDayTicker>>());
         expect(dayTicker.length, equals(1));
+        expect(BinanceDayTicker.fromJson(dayTicker.first.toJson()),
+            equals(dayTicker.first));
         // don't select symbol, more than 1 entry in the list
         _api.dispose();
         _api.apiClient = dayTickerOkClient2;
@@ -457,6 +520,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -468,6 +533,8 @@ void main() {
         final priceTicker = await _api.priceTicker(symbol: 'BNBETH');
         expect(priceTicker, isA<List<BinancePriceTicker>>());
         expect(priceTicker.length, equals(1));
+        expect(BinancePriceTicker.fromJson(priceTicker.first.toJson()),
+            equals(priceTicker.first));
         // don't select symbol, more than 1 entry in the list
         _api.dispose();
         _api.apiClient = priceTickerOkClient2;
@@ -506,6 +573,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -517,6 +586,8 @@ void main() {
         final bookTicker = await _api.bookTicker(symbol: 'BNBETH');
         expect(bookTicker, isA<List<BinanceBookTicker>>());
         expect(bookTicker.length, equals(1));
+        expect(BinanceBookTicker.fromJson(bookTicker.first.toJson()),
+            equals(bookTicker.first));
         // don't select symbol, more than 1 entry in the list
         _api.dispose();
         _api.apiClient = bookTickerOkClient2;
@@ -555,6 +626,8 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });
@@ -806,7 +879,7 @@ void main() {
       test('sendOrder query parameters test', () {
         final queryParams = _api.buildTradeOrderParams(
             'test',
-            Side.buy,
+            Side.sell,
             OrderType.limit,
             1,
             0,
@@ -819,6 +892,23 @@ void main() {
             null);
         expect(queryParams, containsPair('timeInForce', TimeInForce.gtc.value));
       });
+      test('sendOrder dryRun test', () async {
+        _api.dispose();
+        _api.apiClient = testTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        const symbol = 'BNBETH';
+        final testOrderResponse = await _api.sendOrder(
+          symbol: symbol,
+          quantity: 1,
+          price: 0.5,
+          dryRun: true,
+        );
+        expect(testOrderResponse, isA<BinanceTradeResponse>());
+        expect(testOrderResponse, equals(BinanceTradeResponse.dry(symbol)));
+        expect(BinanceTradeResponse.fromJson(testOrderResponse.toJson()),
+            equals(testOrderResponse));
+      });
       test('KO sendOrder should throw', () async {
         _api.dispose();
         _api.apiClient = koClient;
@@ -830,6 +920,118 @@ void main() {
         } catch (e) {
           print(e);
           expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
+        }
+      });
+    });
+    group('getOrderStatus tests', () {
+      test('OK getOrderStatus should return a Map', () async {
+        _api.dispose();
+        _api.apiClient = getTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        final orderStatus =
+            await _api.getOrderStatus(symbol: 'BNBETH', orderId: 1);
+        expect(orderStatus, isA<BinanceOrderStatus>());
+        expect(orderStatus.orderId, equals(1));
+        expect(BinanceOrderStatus.fromJson(orderStatus.toJson()),
+            equals(orderStatus));
+      });
+      test('either orderId or origClientOrderId must be sent', () async {
+        _api.dispose();
+        _api.apiClient = getTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          // missing orderId or origClientOrderId
+          await _api.getOrderStatus(symbol: 'BNBETH');
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          await _api.getOrderStatus(
+            symbol: 'BNBETH',
+            orderId: -1,
+          );
+          await _api.getOrderStatus(
+            symbol: 'BNBETH',
+            origClientOrderId: '1',
+          );
+        } on ArgumentError catch (e) {
+          print(e);
+          fail('should not have thrown an ArgumentError');
+        }
+      });
+      test('KO getOrderStatus should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          await _api.getOrderStatus(symbol: 'BNBETH', orderId: -1);
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
+        }
+      });
+    });
+    group('cancelOrder tests', () {
+      test('OK cancelOrder should return a BinanceOrderStatus', () async {
+        _api.dispose();
+        _api.apiClient = cancelTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        final orderStatus =
+            await _api.cancelOrder(symbol: 'BNBETH', orderId: 1);
+        expect(orderStatus, isA<BinanceOrderStatus>());
+        expect(orderStatus.orderId, equals(1));
+      });
+      test('either orderId or origClientOrderId must be sent', () async {
+        _api.dispose();
+        _api.apiClient = cancelTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          // missing orderId or origClientOrderId
+          await _api.cancelOrder(symbol: 'BNBETH');
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          await _api.cancelOrder(
+            symbol: 'BNBETH',
+            orderId: -1,
+          );
+          await _api.cancelOrder(
+            symbol: 'BNBETH',
+            origClientOrderId: '1',
+          );
+        } on ArgumentError catch (e) {
+          print(e);
+          fail('should not have thrown an ArgumentError');
+        }
+      });
+      test('KO cancelOrder should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          await _api.cancelOrder(symbol: 'BNBETH', orderId: -1);
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
         }
       });
     });

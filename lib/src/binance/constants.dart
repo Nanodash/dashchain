@@ -52,7 +52,21 @@ const String priceTickerPath = '/ticker/price';
 
 /// The endpoint to get the book ticker of symbol(s).
 const String bookTickerPath = '/ticker/bookTicker';
+// -----------------------------------
+
+// -------- ACCOUNT ENDPOINTS --------
 
 /// The endpoint to send a trade order.
 const String tradeOrderPath = '/order';
+
+/// The endpoint to send a **test** trade order.
+const String testTradeOrderPath = '/order/test';
+// -----------------------------------
+
+// -------------- MISC. --------------
+/// recvWindow param must be a positive integer
+const kMinRecvWindow = 0;
+
+/// recvWindow param must be below 60sec
+const kMaxRecvWindow = 60000;
 // -----------------------------------

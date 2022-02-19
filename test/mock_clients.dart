@@ -75,7 +75,40 @@ late final MockClient timeOkClient = MockClient(
 late final MockClient exchangeInfoOkClient = MockClient(
   (Request request) => Future.value(
     Response(
-      jsonEncode(BinanceExchangeInfo('test', -1, [], [], [])),
+      jsonEncode(BinanceExchangeInfo('test', -1, [
+        BinanceRateLimiter.fromJson({
+          'rateLimitType': 'test',
+          'interval': Interval.d1.value,
+          'intervalNum': -1,
+          'limit': -1,
+        }),
+      ], [
+        BinanceExchangeFilter.fromJson({
+          'filterType': 'test',
+          'maxNumAlgoOrders': -1,
+        }),
+      ], [
+        BinanceSymbol(
+          'test',
+          BinanceTradingStatus
+              .auctionMatch.value, // last enum value for coverage
+          'test',
+          6,
+          'test',
+          6,
+          6,
+          6,
+          6,
+          [],
+          false,
+          false,
+          false,
+          false,
+          false,
+          [],
+          [],
+        ),
+      ])),
       200,
       reasonPhrase: 'exchangeInfoOkClient',
     ),
@@ -455,41 +488,41 @@ late final MockClient tradeOrderOkClient = MockClient(
             "type": "MARKET",
             "side": "SELL",
             "fills": [
-              {
-                "price": "4000.00000000",
-                "qty": "1.00000000",
-                "commission": "4.00000000",
-                "commissionAsset": "USDT",
-                "tradeId": 56
-              },
-              {
-                "price": "3999.00000000",
-                "qty": "5.00000000",
-                "commission": "19.99500000",
-                "commissionAsset": "USDT",
-                "tradeId": 57
-              },
-              {
-                "price": "3998.00000000",
-                "qty": "2.00000000",
-                "commission": "7.99600000",
-                "commissionAsset": "USDT",
-                "tradeId": 58
-              },
-              {
-                "price": "3997.00000000",
-                "qty": "1.00000000",
-                "commission": "3.99700000",
-                "commissionAsset": "USDT",
-                "tradeId": 59
-              },
-              {
-                "price": "3995.00000000",
-                "qty": "1.00000000",
-                "commission": "3.99500000",
-                "commissionAsset": "USDT",
-                "tradeId": 60
-              }
+              BinanceOrderFill(
+                "4000.00000000",
+                "1.00000000",
+                "4.00000000",
+                "USDT",
+                56,
+              ).toJson(),
+              BinanceOrderFill(
+                "3999.00000000",
+                "5.00000000",
+                "19.99500000",
+                "USDT",
+                57,
+              ).toJson(),
+              BinanceOrderFill(
+                "3998.00000000",
+                "2.00000000",
+                "7.99600000",
+                "USDT",
+                58,
+              ).toJson(),
+              BinanceOrderFill(
+                "3997.00000000",
+                "1.00000000",
+                "3.99700000",
+                "USDT",
+                59,
+              ).toJson(),
+              BinanceOrderFill(
+                "3995.00000000",
+                "1.00000000",
+                "3.99500000",
+                "USDT",
+                60,
+              ).toJson()
             ]
           };
           mockResponse = Response(
@@ -509,4 +542,61 @@ late final MockClient tradeOrderOkClient = MockClient(
     }
     return Future.value(mockResponse);
   },
+);
+
+late final MockClient testTradeOrderOkClient = MockClient(
+  (Request request) => Future.value(Response(
+    jsonEncode({}),
+    200,
+    reasonPhrase: 'testTradeOrderOkClient',
+  )),
+);
+
+late final MockClient getTradeOrderOkClient = MockClient(
+  (Request request) => Future.value(Response(
+    jsonEncode({
+      "symbol": "LTCBTC",
+      "orderId": 1,
+      "orderListId": -1, //Unless part of an OCO, the value will always be -1.
+      "clientOrderId": "myOrder1",
+      "price": "0.1",
+      "origQty": "1.0",
+      "executedQty": "0.0",
+      "cummulativeQuoteQty": "0.0",
+      "status": "NEW",
+      "timeInForce": "GTC",
+      "type": "LIMIT",
+      "side": "BUY",
+      "stopPrice": "0.0",
+      "icebergQty": "0.0",
+      "time": 1499827319559,
+      "updateTime": 1499827319559,
+      "isWorking": true,
+      "origQuoteOrderQty": "0.000000"
+    }),
+    200,
+    reasonPhrase: 'getTradeOrderOkClient',
+  )),
+);
+
+late final MockClient cancelTradeOrderOkClient = MockClient(
+  (Request request) => Future.value(Response(
+    jsonEncode({
+      "symbol": "LTCBTC",
+      "origClientOrderId": "myOrder1",
+      "orderId": 1,
+      "orderListId": -1, //Unless part of an OCO, the value will always be -1.
+      "clientOrderId": "cancelMyOrder1",
+      "price": "2.00000000",
+      "origQty": "1.00000000",
+      "executedQty": "0.00000000",
+      "cummulativeQuoteQty": "0.00000000",
+      "status": "CANCELED",
+      "timeInForce": "GTC",
+      "type": "LIMIT",
+      "side": "BUY"
+    }),
+    200,
+    reasonPhrase: 'cancelTradeOrderOkClient',
+  )),
 );

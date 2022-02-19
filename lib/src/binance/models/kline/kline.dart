@@ -1,3 +1,5 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 class BinanceKline {
   final int openTime;
   final String openPrice;
@@ -58,47 +60,39 @@ class BinanceKline {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BinanceKline &&
-            (identical(other.openTime, openTime) ||
-                other.openTime == openTime) &&
-            (identical(other.openPrice, openPrice) ||
-                other.openPrice == openPrice) &&
-            (identical(other.highPrice, highPrice) ||
-                other.highPrice == highPrice) &&
-            (identical(other.lowPrice, lowPrice) ||
-                other.lowPrice == lowPrice) &&
-            (identical(other.closePrice, closePrice) ||
-                other.closePrice == closePrice) &&
-            (identical(other.volume, volume) || other.volume == volume) &&
-            (identical(other.closeTime, closeTime) ||
-                other.closeTime == closeTime) &&
-            (identical(other.quoteAssetVolume, quoteAssetVolume) ||
-                other.quoteAssetVolume == quoteAssetVolume) &&
-            (identical(other.trades, trades) || other.trades == trades) &&
-            (identical(
-                    other.takerBuyBaseAssetVolume, takerBuyBaseAssetVolume) ||
-                other.takerBuyBaseAssetVolume == takerBuyBaseAssetVolume) &&
-            (identical(
-                    other.takerBuyQuoteAssetVolume, takerBuyQuoteAssetVolume) ||
-                other.takerBuyQuoteAssetVolume == takerBuyQuoteAssetVolume) &&
-            (identical(other.ignore, ignore) || other.ignore == ignore));
+            const DeepCollectionEquality().equals(other.openTime, openTime) &&
+            const DeepCollectionEquality().equals(other.openPrice, openPrice) &&
+            const DeepCollectionEquality().equals(other.highPrice, highPrice) &&
+            const DeepCollectionEquality().equals(other.lowPrice, lowPrice) &&
+            const DeepCollectionEquality()
+                .equals(other.closePrice, closePrice) &&
+            const DeepCollectionEquality().equals(other.volume, volume) &&
+            const DeepCollectionEquality().equals(other.closeTime, closeTime) &&
+            const DeepCollectionEquality()
+                .equals(other.quoteAssetVolume, quoteAssetVolume) &&
+            const DeepCollectionEquality().equals(other.trades, trades) &&
+            const DeepCollectionEquality().equals(
+                other.takerBuyBaseAssetVolume, takerBuyBaseAssetVolume) &&
+            const DeepCollectionEquality().equals(
+                other.takerBuyQuoteAssetVolume, takerBuyQuoteAssetVolume) &&
+            const DeepCollectionEquality().equals(other.ignore, ignore));
   }
 
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        openTime,
-        openPrice,
-        highPrice,
-        lowPrice,
-        closePrice,
-        volume,
-        closeTime,
-        quoteAssetVolume,
-        trades,
-        takerBuyBaseAssetVolume,
-        takerBuyQuoteAssetVolume,
-        ignore,
-      );
+      runtimeType,
+      const DeepCollectionEquality().hash(openTime),
+      const DeepCollectionEquality().hash(openPrice),
+      const DeepCollectionEquality().hash(highPrice),
+      const DeepCollectionEquality().hash(lowPrice),
+      const DeepCollectionEquality().hash(closePrice),
+      const DeepCollectionEquality().hash(volume),
+      const DeepCollectionEquality().hash(closeTime),
+      const DeepCollectionEquality().hash(quoteAssetVolume),
+      const DeepCollectionEquality().hash(trades),
+      const DeepCollectionEquality().hash(takerBuyBaseAssetVolume),
+      const DeepCollectionEquality().hash(takerBuyQuoteAssetVolume),
+      const DeepCollectionEquality().hash(ignore));
 
   factory BinanceKline.fromJson(List kline) => BinanceKline(
         kline[0],

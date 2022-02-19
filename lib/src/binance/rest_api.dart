@@ -105,6 +105,9 @@ class BinanceRestApi {
       case RequestMethod.post:
         response = await _apiClient.post(uri, headers: headers);
         break;
+      case RequestMethod.delete:
+        response = await _apiClient.delete(uri, headers: headers);
+        break;
     }
     _log('received answer after ${_stopwatch.elapsedMilliseconds}ms.');
     switch (response.statusCode) {
@@ -617,12 +620,38 @@ class BinanceRestApi {
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   ///
+  /// If [dryRun] is true, it will send a **test** trade order to the Binance API **but will not be sent to the matching engine**.
+  ///
+  /// This mode shall be used to :
+  ///   - validate your keys (if invalid, will throw `BinanceApiError(401, Unauthorized)`)
+  ///   - check server availability (prefer using [ping] for this)
+  ///   - validate the timing security (see below doc)
+  ///   - validate that you are using the right set of parameters (if invalid: client throws `ArgumentError`, server may throw `BinanceApiError(400, Bad Request)`)
+  ///
   /// Other info from docs :
+  ///
   /// _Any `LIMIT` or `LIMIT_MAKER` type order can be made an iceberg order by sending an `icebergQty`.
   /// Any order with an `icebergQty` **MUST** have `timeInForce` set to `GTC`. (it is done by library)
   /// `MARKET` orders using `quoteOrderQty` will not break `LOT_SIZE` filter rules; the order will execute a quantity that will have the notional value as close as possible to `quoteOrderQty`. Trigger order price rules against market price for both `MARKET` and `LIMIT` versions:
   /// Price above market price: `STOP_LOSS` BUY, `TAKE_PROFIT` SELL
   /// Price below market price: `STOP_LOSS` SELL, `TAKE_PROFIT` BUY_
+  ///
+  /// Timing security :
+  ///
+  ///   A SIGNED endpoint also requires a parameter, timestamp, to be sent which should be the millisecond timestamp of when the request was created and sent.
+  ///   An additional parameter, recvWindow, may be sent to specify the number of milliseconds after timestamp the request is valid for. If recvWindow is not sent, it defaults to 5000.
+  ///   The logic is as follows:
+  ///
+  ///  ```dart
+  ///   if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow) {
+  ///     // process request
+  ///   } else {
+  ///     // reject request
+  ///   }
+  ///  ```
+  /// Serious trading is about timing. Networks can be unstable and unreliable, which can lead to requests taking varying amounts of time to reach the servers. With recvWindow, you can specify that the request must be processed within a certain number of milliseconds or be rejected by the server.
+  ///
+  /// It is recommended to use a small recvWindow of 5000 or less! The max cannot go beyond 60,000!
   Future<BinanceTradeResponse> sendOrder({
     String baseUri = defaultUri,
     required String symbol,
@@ -649,9 +678,8 @@ class BinanceRestApi {
 
     /// The value cannot be greater than 60000
     int recvWindow = 5000,
+    bool dryRun = false,
   }) async {
-    const kMinRecvWindow = 0;
-    const kMaxRecvWindow = 60000;
     if (recvWindow < kMinRecvWindow || recvWindow > kMaxRecvWindow) {
       throw RangeError(
           'recvWindow should be a positive value less than $kMaxRecvWindow');
@@ -720,12 +748,17 @@ class BinanceRestApi {
     // send request
     final result = await sendRequest(
       baseUri,
-      tradeOrderPath,
+      dryRun ? testTradeOrderPath : tradeOrderPath,
       queryParameters: queryParameters,
       requestMethod: RequestMethod.post,
       withSignature: true,
     );
-    return BinanceTradeResponse.fromJson(result);
+    if (dryRun) {
+      // API response is empty Map, so here we just build an empty [BinanceTradeResponse]
+      return BinanceTradeResponse.dry(symbol);
+    } else {
+      return BinanceTradeResponse.fromJson(result);
+    }
   }
 
   @visibleForTesting
@@ -771,5 +804,95 @@ class BinanceRestApi {
       queryParameters['newOrderRespType'] = newOrderRespType.value;
     }
     return queryParameters;
+  }
+
+  /// Will query the status of a given order.
+  ///
+  /// API Key required : yes (+ signature)
+  ///
+  /// Query weight : 2
+  ///
+  /// Returns a [BinanceOrderStatus] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  ///
+  /// Other info from docs:
+  ///
+  /// - Either orderId or origClientOrderId must be sent.
+  /// - For some historical orders cummulativeQuoteQty will be < 0, meaning the data is not available at this time.
+  Future<BinanceOrderStatus> getOrderStatus({
+    String baseUri = defaultUri,
+    required String symbol,
+    int? orderId,
+    String? origClientOrderId,
+    int recvWindow = 5000,
+  }) async {
+    if (null == orderId && null == origClientOrderId) {
+      throw ArgumentError('Either orderId or origClientOrderId must be sent.');
+    }
+    final queryParameters = {
+      'symbol': symbol,
+      'recvWindow': '$recvWindow',
+    };
+    if (null != orderId) {
+      queryParameters['orderId'] = '$orderId';
+    }
+    if (null != origClientOrderId) {
+      queryParameters['origClientOrderId'] = origClientOrderId;
+    }
+    return BinanceOrderStatus.fromJson(await sendRequest(
+      baseUri,
+      tradeOrderPath,
+      queryParameters: queryParameters,
+      withSignature: true,
+    ));
+  }
+
+  /// Will ask to cancel a given order.
+  ///
+  /// API Key required : yes (+ signature)
+  ///
+  /// Query weight : 1
+  ///
+  /// Returns a [BinanceOrderStatus] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  ///
+  /// Other info from docs:
+  ///
+  /// - Either orderId or origClientOrderId must be sent.
+  Future<BinanceOrderStatus> cancelOrder({
+    String baseUri = defaultUri,
+    required String symbol,
+    int? orderId,
+    String? origClientOrderId,
+
+    /// Used to uniquely identify this cancel. Automatically generated by default.
+    String? newClientOrderId,
+    int recvWindow = 5000,
+  }) async {
+    if (null == orderId && null == origClientOrderId) {
+      throw ArgumentError('Either orderId or origClientOrderId must be sent.');
+    }
+    final queryParameters = {
+      'symbol': symbol,
+      'recvWindow': '$recvWindow',
+    };
+    if (null != orderId) {
+      queryParameters['orderId'] = '$orderId';
+    }
+    if (null != origClientOrderId) {
+      queryParameters['origClientOrderId'] = origClientOrderId;
+    }
+    if (null != newClientOrderId) {
+      queryParameters['newClientOrderId'] = newClientOrderId;
+    }
+    return BinanceOrderStatus.fromJson(await sendRequest(
+      baseUri,
+      tradeOrderPath,
+      queryParameters: queryParameters,
+      requestMethod: RequestMethod.delete,
+      withSignature: true,
+    ));
   }
 }
