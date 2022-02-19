@@ -928,5 +928,59 @@ void main() {
         }
       });
     });
+    group('cancelOrder tests', () {
+      test('OK cancelOrder should return a BinanceOrderStatus', () async {
+        _api.dispose();
+        _api.apiClient = cancelTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        final orderStatus =
+            await _api.cancelOrder(symbol: 'BNBETH', orderId: 1);
+        expect(orderStatus, isA<BinanceOrderStatus>());
+        expect(orderStatus.orderId, equals(1));
+      });
+      test('either orderId or origClientOrderId must be sent', () async {
+        _api.dispose();
+        _api.apiClient = cancelTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          // missing orderId or origClientOrderId
+          await _api.cancelOrder(symbol: 'BNBETH');
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          await _api.cancelOrder(
+            symbol: 'BNBETH',
+            orderId: -1,
+          );
+          await _api.cancelOrder(
+            symbol: 'BNBETH',
+            origClientOrderId: '1',
+          );
+        } on ArgumentError catch (e) {
+          print(e);
+          fail('should not have thrown an ArgumentError');
+        }
+      });
+      test('KO cancelOrder should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          await _api.cancelOrder(symbol: 'BNBETH', orderId: -1);
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
+        }
+      });
+    });
   });
 }

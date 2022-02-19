@@ -127,18 +127,34 @@ Future<void> _sendLimitBuyOrder(
   print('sending BUY order on ${targetPair.symbol} : '
       '$minimumQty BNB at $targetPrice ${targetPair.quoteAsset} (~$minimumQuoteQty BUSD)...'
       'current price: $currentPrice ${targetPair.quoteAsset}');
-  // send buy limit order
-  final orderResponse = await api.sendOrder(
+  // send buy limit order, check status and cancel
+  await api
+      .sendOrder(
     baseUri: endpointUri,
     symbol: targetPair.symbol,
     quantity: minimumQty,
     price: targetPrice,
-  );
-  print(orderResponse);
-  print('checking order status...');
-  final orderStatus = await api.getOrderStatus(
-    symbol: orderResponse.symbol,
-    orderId: orderResponse.orderId,
-  );
-  print(orderStatus);
+  )
+      .then((orderResponse) async {
+    print('checking order status...');
+    final orderStatus = await api.getOrderStatus(
+      symbol: orderResponse.symbol,
+      orderId: orderResponse.orderId,
+    );
+    if (orderStatus.status == 'NEW' && orderStatus.isWorking!) {
+      print('order is indeed pending !');
+      print('cancelling order...');
+      final cancelOrder = await api.cancelOrder(
+        symbol: orderStatus.symbol,
+        orderId: orderStatus.orderId,
+      );
+      if (cancelOrder.status == 'CANCELED') {
+        print('order successfully canceled !');
+      } else {
+        print('Oops..! the order could not be properly cancelled...');
+      }
+    } else {
+      print('unexpected order status :o\n$orderStatus');
+    }
+  });
 }

@@ -7,6 +7,7 @@ part 'order_status.g.dart';
 class BinanceOrderStatus with _$BinanceOrderStatus {
   factory BinanceOrderStatus(
     String symbol,
+    String? origClientOrderId,
     int orderId,
     int orderListId,
     String clientOrderId,
@@ -18,12 +19,12 @@ class BinanceOrderStatus with _$BinanceOrderStatus {
     String timeInForce,
     String type,
     String side,
-    String stopPrice,
-    String icebergQty,
-    int time,
-    int updateTime,
-    bool isWorking,
-    String origQuoteOrderQty,
+    String? stopPrice,
+    String? icebergQty,
+    int? time,
+    int? updateTime,
+    bool? isWorking,
+    String? origQuoteOrderQty,
   ) = _BinanceOrderStatus;
 
   factory BinanceOrderStatus.fromJson(Map<String, dynamic> json) =>

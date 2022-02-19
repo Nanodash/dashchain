@@ -1,6 +1,7 @@
 enum RequestMethod {
   get,
   post,
+  delete,
 }
 
 extension RequestMethodAsString on RequestMethod {
@@ -10,6 +11,8 @@ extension RequestMethodAsString on RequestMethod {
         return 'GET';
       case RequestMethod.post:
         return 'POST';
+      case RequestMethod.delete:
+        return 'DELETE';
     }
   }
 }
