@@ -882,8 +882,8 @@ void main() {
         _api.apiSecretKey = 'apiSecretKey';
         final orderStatus =
             await _api.getOrderStatus(symbol: 'BNBETH', orderId: 1);
-        expect(orderStatus, isA<Map>());
-        expect(orderStatus, containsPair('orderId', 1));
+        expect(orderStatus, isA<BinanceOrderStatus>());
+        expect(orderStatus.orderId, equals(1));
       });
       test('either orderId or origClientOrderId must be sent', () async {
         _api.dispose();

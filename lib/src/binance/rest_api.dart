@@ -817,13 +817,13 @@ class BinanceRestApi {
   ///
   /// - Either orderId or origClientOrderId must be sent.
   /// - For some historical orders cummulativeQuoteQty will be < 0, meaning the data is not available at this time.
-  Future<dynamic> getOrderStatus({
+  Future<BinanceOrderStatus> getOrderStatus({
     String baseUri = defaultUri,
     required String symbol,
     int? orderId,
     String? origClientOrderId,
     int recvWindow = 5000,
-  }) {
+  }) async {
     if (null == orderId && null == origClientOrderId) {
       throw ArgumentError('Either orderId or origClientOrderId must be sent.');
     }
@@ -837,11 +837,11 @@ class BinanceRestApi {
     if (null != origClientOrderId) {
       queryParameters['origClientOrderId'] = origClientOrderId;
     }
-    return sendRequest(
+    return BinanceOrderStatus.fromJson(await sendRequest(
       baseUri,
       tradeOrderPath,
       queryParameters: queryParameters,
       withSignature: true,
-    );
+    ));
   }
 }
