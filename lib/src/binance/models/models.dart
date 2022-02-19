@@ -12,4 +12,3 @@ export 'tickers/price_ticker.dart';
 export 'trade/order_fill.dart';
 export 'trade/order_status.dart';
 export 'trade/trade.dart';
-export 'trade/trade_response.dart';

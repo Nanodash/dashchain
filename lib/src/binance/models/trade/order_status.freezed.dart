@@ -28,16 +28,18 @@ class _$BinanceOrderStatusTearOff {
       int orderId,
       int orderListId,
       String clientOrderId,
-      String price,
-      String origQty,
-      String executedQty,
-      String cummulativeQuoteQty,
-      String status,
-      String timeInForce,
-      String type,
-      String side,
+      int? transactTime,
+      String? price,
+      String? origQty,
+      String? executedQty,
+      String? cummulativeQuoteQty,
+      String? status,
+      String? timeInForce,
+      String? type,
+      String? side,
       String? stopPrice,
       String? icebergQty,
+      List<BinanceOrderFill>? fills,
       int? time,
       int? updateTime,
       bool? isWorking,
@@ -48,6 +50,7 @@ class _$BinanceOrderStatusTearOff {
       orderId,
       orderListId,
       clientOrderId,
+      transactTime,
       price,
       origQty,
       executedQty,
@@ -58,6 +61,7 @@ class _$BinanceOrderStatusTearOff {
       side,
       stopPrice,
       icebergQty,
+      fills,
       time,
       updateTime,
       isWorking,
@@ -80,16 +84,18 @@ mixin _$BinanceOrderStatus {
   int get orderId => throw _privateConstructorUsedError;
   int get orderListId => throw _privateConstructorUsedError;
   String get clientOrderId => throw _privateConstructorUsedError;
-  String get price => throw _privateConstructorUsedError;
-  String get origQty => throw _privateConstructorUsedError;
-  String get executedQty => throw _privateConstructorUsedError;
-  String get cummulativeQuoteQty => throw _privateConstructorUsedError;
-  String get status => throw _privateConstructorUsedError;
-  String get timeInForce => throw _privateConstructorUsedError;
-  String get type => throw _privateConstructorUsedError;
-  String get side => throw _privateConstructorUsedError;
+  int? get transactTime => throw _privateConstructorUsedError;
+  String? get price => throw _privateConstructorUsedError;
+  String? get origQty => throw _privateConstructorUsedError;
+  String? get executedQty => throw _privateConstructorUsedError;
+  String? get cummulativeQuoteQty => throw _privateConstructorUsedError;
+  String? get status => throw _privateConstructorUsedError;
+  String? get timeInForce => throw _privateConstructorUsedError;
+  String? get type => throw _privateConstructorUsedError;
+  String? get side => throw _privateConstructorUsedError;
   String? get stopPrice => throw _privateConstructorUsedError;
   String? get icebergQty => throw _privateConstructorUsedError;
+  List<BinanceOrderFill>? get fills => throw _privateConstructorUsedError;
   int? get time => throw _privateConstructorUsedError;
   int? get updateTime => throw _privateConstructorUsedError;
   bool? get isWorking => throw _privateConstructorUsedError;
@@ -112,16 +118,18 @@ abstract class $BinanceOrderStatusCopyWith<$Res> {
       int orderId,
       int orderListId,
       String clientOrderId,
-      String price,
-      String origQty,
-      String executedQty,
-      String cummulativeQuoteQty,
-      String status,
-      String timeInForce,
-      String type,
-      String side,
+      int? transactTime,
+      String? price,
+      String? origQty,
+      String? executedQty,
+      String? cummulativeQuoteQty,
+      String? status,
+      String? timeInForce,
+      String? type,
+      String? side,
       String? stopPrice,
       String? icebergQty,
+      List<BinanceOrderFill>? fills,
       int? time,
       int? updateTime,
       bool? isWorking,
@@ -144,6 +152,7 @@ class _$BinanceOrderStatusCopyWithImpl<$Res>
     Object? orderId = freezed,
     Object? orderListId = freezed,
     Object? clientOrderId = freezed,
+    Object? transactTime = freezed,
     Object? price = freezed,
     Object? origQty = freezed,
     Object? executedQty = freezed,
@@ -154,6 +163,7 @@ class _$BinanceOrderStatusCopyWithImpl<$Res>
     Object? side = freezed,
     Object? stopPrice = freezed,
     Object? icebergQty = freezed,
+    Object? fills = freezed,
     Object? time = freezed,
     Object? updateTime = freezed,
     Object? isWorking = freezed,
@@ -180,38 +190,42 @@ class _$BinanceOrderStatusCopyWithImpl<$Res>
           ? _value.clientOrderId
           : clientOrderId // ignore: cast_nullable_to_non_nullable
               as String,
+      transactTime: transactTime == freezed
+          ? _value.transactTime
+          : transactTime // ignore: cast_nullable_to_non_nullable
+              as int?,
       price: price == freezed
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       origQty: origQty == freezed
           ? _value.origQty
           : origQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       executedQty: executedQty == freezed
           ? _value.executedQty
           : executedQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       cummulativeQuoteQty: cummulativeQuoteQty == freezed
           ? _value.cummulativeQuoteQty
           : cummulativeQuoteQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       status: status == freezed
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       timeInForce: timeInForce == freezed
           ? _value.timeInForce
           : timeInForce // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       type: type == freezed
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       side: side == freezed
           ? _value.side
           : side // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       stopPrice: stopPrice == freezed
           ? _value.stopPrice
           : stopPrice // ignore: cast_nullable_to_non_nullable
@@ -220,6 +234,10 @@ class _$BinanceOrderStatusCopyWithImpl<$Res>
           ? _value.icebergQty
           : icebergQty // ignore: cast_nullable_to_non_nullable
               as String?,
+      fills: fills == freezed
+          ? _value.fills
+          : fills // ignore: cast_nullable_to_non_nullable
+              as List<BinanceOrderFill>?,
       time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
@@ -253,16 +271,18 @@ abstract class _$BinanceOrderStatusCopyWith<$Res>
       int orderId,
       int orderListId,
       String clientOrderId,
-      String price,
-      String origQty,
-      String executedQty,
-      String cummulativeQuoteQty,
-      String status,
-      String timeInForce,
-      String type,
-      String side,
+      int? transactTime,
+      String? price,
+      String? origQty,
+      String? executedQty,
+      String? cummulativeQuoteQty,
+      String? status,
+      String? timeInForce,
+      String? type,
+      String? side,
       String? stopPrice,
       String? icebergQty,
+      List<BinanceOrderFill>? fills,
       int? time,
       int? updateTime,
       bool? isWorking,
@@ -287,6 +307,7 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
     Object? orderId = freezed,
     Object? orderListId = freezed,
     Object? clientOrderId = freezed,
+    Object? transactTime = freezed,
     Object? price = freezed,
     Object? origQty = freezed,
     Object? executedQty = freezed,
@@ -297,6 +318,7 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
     Object? side = freezed,
     Object? stopPrice = freezed,
     Object? icebergQty = freezed,
+    Object? fills = freezed,
     Object? time = freezed,
     Object? updateTime = freezed,
     Object? isWorking = freezed,
@@ -323,38 +345,42 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
           ? _value.clientOrderId
           : clientOrderId // ignore: cast_nullable_to_non_nullable
               as String,
+      transactTime == freezed
+          ? _value.transactTime
+          : transactTime // ignore: cast_nullable_to_non_nullable
+              as int?,
       price == freezed
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       origQty == freezed
           ? _value.origQty
           : origQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       executedQty == freezed
           ? _value.executedQty
           : executedQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       cummulativeQuoteQty == freezed
           ? _value.cummulativeQuoteQty
           : cummulativeQuoteQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       status == freezed
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       timeInForce == freezed
           ? _value.timeInForce
           : timeInForce // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       type == freezed
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       side == freezed
           ? _value.side
           : side // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       stopPrice == freezed
           ? _value.stopPrice
           : stopPrice // ignore: cast_nullable_to_non_nullable
@@ -363,6 +389,10 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
           ? _value.icebergQty
           : icebergQty // ignore: cast_nullable_to_non_nullable
               as String?,
+      fills == freezed
+          ? _value.fills
+          : fills // ignore: cast_nullable_to_non_nullable
+              as List<BinanceOrderFill>?,
       time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
@@ -392,6 +422,7 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
       this.orderId,
       this.orderListId,
       this.clientOrderId,
+      this.transactTime,
       this.price,
       this.origQty,
       this.executedQty,
@@ -402,6 +433,7 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
       this.side,
       this.stopPrice,
       this.icebergQty,
+      this.fills,
       this.time,
       this.updateTime,
       this.isWorking,
@@ -421,25 +453,29 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
   @override
   final String clientOrderId;
   @override
-  final String price;
+  final int? transactTime;
   @override
-  final String origQty;
+  final String? price;
   @override
-  final String executedQty;
+  final String? origQty;
   @override
-  final String cummulativeQuoteQty;
+  final String? executedQty;
   @override
-  final String status;
+  final String? cummulativeQuoteQty;
   @override
-  final String timeInForce;
+  final String? status;
   @override
-  final String type;
+  final String? timeInForce;
   @override
-  final String side;
+  final String? type;
+  @override
+  final String? side;
   @override
   final String? stopPrice;
   @override
   final String? icebergQty;
+  @override
+  final List<BinanceOrderFill>? fills;
   @override
   final int? time;
   @override
@@ -451,7 +487,7 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
 
   @override
   String toString() {
-    return 'BinanceOrderStatus(symbol: $symbol, origClientOrderId: $origClientOrderId, orderId: $orderId, orderListId: $orderListId, clientOrderId: $clientOrderId, price: $price, origQty: $origQty, executedQty: $executedQty, cummulativeQuoteQty: $cummulativeQuoteQty, status: $status, timeInForce: $timeInForce, type: $type, side: $side, stopPrice: $stopPrice, icebergQty: $icebergQty, time: $time, updateTime: $updateTime, isWorking: $isWorking, origQuoteOrderQty: $origQuoteOrderQty)';
+    return 'BinanceOrderStatus(symbol: $symbol, origClientOrderId: $origClientOrderId, orderId: $orderId, orderListId: $orderListId, clientOrderId: $clientOrderId, transactTime: $transactTime, price: $price, origQty: $origQty, executedQty: $executedQty, cummulativeQuoteQty: $cummulativeQuoteQty, status: $status, timeInForce: $timeInForce, type: $type, side: $side, stopPrice: $stopPrice, icebergQty: $icebergQty, fills: $fills, time: $time, updateTime: $updateTime, isWorking: $isWorking, origQuoteOrderQty: $origQuoteOrderQty)';
   }
 
   @override
@@ -467,6 +503,8 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
                 .equals(other.orderListId, orderListId) &&
             const DeepCollectionEquality()
                 .equals(other.clientOrderId, clientOrderId) &&
+            const DeepCollectionEquality()
+                .equals(other.transactTime, transactTime) &&
             const DeepCollectionEquality().equals(other.price, price) &&
             const DeepCollectionEquality().equals(other.origQty, origQty) &&
             const DeepCollectionEquality()
@@ -481,6 +519,7 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
             const DeepCollectionEquality().equals(other.stopPrice, stopPrice) &&
             const DeepCollectionEquality()
                 .equals(other.icebergQty, icebergQty) &&
+            const DeepCollectionEquality().equals(other.fills, fills) &&
             const DeepCollectionEquality().equals(other.time, time) &&
             const DeepCollectionEquality()
                 .equals(other.updateTime, updateTime) &&
@@ -497,6 +536,7 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
         const DeepCollectionEquality().hash(orderId),
         const DeepCollectionEquality().hash(orderListId),
         const DeepCollectionEquality().hash(clientOrderId),
+        const DeepCollectionEquality().hash(transactTime),
         const DeepCollectionEquality().hash(price),
         const DeepCollectionEquality().hash(origQty),
         const DeepCollectionEquality().hash(executedQty),
@@ -507,6 +547,7 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
         const DeepCollectionEquality().hash(side),
         const DeepCollectionEquality().hash(stopPrice),
         const DeepCollectionEquality().hash(icebergQty),
+        const DeepCollectionEquality().hash(fills),
         const DeepCollectionEquality().hash(time),
         const DeepCollectionEquality().hash(updateTime),
         const DeepCollectionEquality().hash(isWorking),
@@ -531,16 +572,18 @@ abstract class _BinanceOrderStatus implements BinanceOrderStatus {
       int orderId,
       int orderListId,
       String clientOrderId,
-      String price,
-      String origQty,
-      String executedQty,
-      String cummulativeQuoteQty,
-      String status,
-      String timeInForce,
-      String type,
-      String side,
+      int? transactTime,
+      String? price,
+      String? origQty,
+      String? executedQty,
+      String? cummulativeQuoteQty,
+      String? status,
+      String? timeInForce,
+      String? type,
+      String? side,
       String? stopPrice,
       String? icebergQty,
+      List<BinanceOrderFill>? fills,
       int? time,
       int? updateTime,
       bool? isWorking,
@@ -560,25 +603,29 @@ abstract class _BinanceOrderStatus implements BinanceOrderStatus {
   @override
   String get clientOrderId;
   @override
-  String get price;
+  int? get transactTime;
   @override
-  String get origQty;
+  String? get price;
   @override
-  String get executedQty;
+  String? get origQty;
   @override
-  String get cummulativeQuoteQty;
+  String? get executedQty;
   @override
-  String get status;
+  String? get cummulativeQuoteQty;
   @override
-  String get timeInForce;
+  String? get status;
   @override
-  String get type;
+  String? get timeInForce;
   @override
-  String get side;
+  String? get type;
+  @override
+  String? get side;
   @override
   String? get stopPrice;
   @override
   String? get icebergQty;
+  @override
+  List<BinanceOrderFill>? get fills;
   @override
   int? get time;
   @override

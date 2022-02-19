@@ -616,7 +616,7 @@ class BinanceRestApi {
   ///
   /// Query weight : 1
   ///
-  /// Returns a [BinanceTradeResponse] based on the given [OrderResponseType].
+  /// Returns a [BinanceOrderStatus] based on the given [OrderResponseType].
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   ///
@@ -652,7 +652,7 @@ class BinanceRestApi {
   /// Serious trading is about timing. Networks can be unstable and unreliable, which can lead to requests taking varying amounts of time to reach the servers. With recvWindow, you can specify that the request must be processed within a certain number of milliseconds or be rejected by the server.
   ///
   /// It is recommended to use a small recvWindow of 5000 or less! The max cannot go beyond 60,000!
-  Future<BinanceTradeResponse> sendOrder({
+  Future<BinanceOrderStatus> sendOrder({
     String baseUri = defaultUri,
     required String symbol,
     Side side = Side.buy,
@@ -754,10 +754,10 @@ class BinanceRestApi {
       withSignature: true,
     );
     if (dryRun) {
-      // API response is empty Map, so here we just build an empty [BinanceTradeResponse]
-      return BinanceTradeResponse.dry(symbol);
+      // API response is empty Map, so here we just build an empty [BinanceOrderStatus]
+      return BinanceOrderStatus.dry(symbol);
     } else {
-      return BinanceTradeResponse.fromJson(result);
+      return BinanceOrderStatus.fromJson(result);
     }
   }
 

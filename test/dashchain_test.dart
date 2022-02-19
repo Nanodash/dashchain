@@ -632,7 +632,7 @@ void main() {
       });
     });
     group('order tests', () {
-      test('OK sendOrder should return BinanceTradeResponse object', () async {
+      test('OK sendOrder should return BinanceOrderStatus object', () async {
         _api.dispose();
         _api.apiClient = tradeOrderOkClient;
         _api.apiKey = 'apiKey';
@@ -644,7 +644,7 @@ void main() {
           price: 0.5,
           newOrderRespType: OrderResponseType.ack,
         );
-        expect(orderResponse, isA<BinanceTradeResponse>());
+        expect(orderResponse, isA<BinanceOrderStatus>());
         // test result response
         orderResponse = await _api.sendOrder(
           symbol: 'BNBETH',
@@ -652,7 +652,7 @@ void main() {
           price: 0.5,
           newOrderRespType: OrderResponseType.result,
         );
-        expect(orderResponse, isA<BinanceTradeResponse>());
+        expect(orderResponse, isA<BinanceOrderStatus>());
         // test full response
         orderResponse = await _api.sendOrder(
           symbol: 'BNBETH',
@@ -660,7 +660,7 @@ void main() {
           price: 0.5,
           newOrderRespType: OrderResponseType.full,
         );
-        expect(orderResponse, isA<BinanceTradeResponse>());
+        expect(orderResponse, isA<BinanceOrderStatus>());
       });
       test('sendOrder may have additional required parameters', () async {
         _api.dispose();
@@ -904,9 +904,9 @@ void main() {
           price: 0.5,
           dryRun: true,
         );
-        expect(testOrderResponse, isA<BinanceTradeResponse>());
-        expect(testOrderResponse, equals(BinanceTradeResponse.dry(symbol)));
-        expect(BinanceTradeResponse.fromJson(testOrderResponse.toJson()),
+        expect(testOrderResponse, isA<BinanceOrderStatus>());
+        expect(testOrderResponse, equals(BinanceOrderStatus.dry(symbol)));
+        expect(BinanceOrderStatus.fromJson(testOrderResponse.toJson()),
             equals(testOrderResponse));
       });
       test('KO sendOrder should throw', () async {
