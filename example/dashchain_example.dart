@@ -135,4 +135,10 @@ Future<void> _sendLimitBuyOrder(
     price: targetPrice,
   );
   print(orderResponse);
+  print('checking order status...');
+  final orderStatus = await api.getOrderStatus(
+    symbol: orderResponse.symbol,
+    orderId: orderResponse.orderId,
+  );
+  print(orderStatus);
 }
