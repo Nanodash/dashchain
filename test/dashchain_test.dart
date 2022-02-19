@@ -803,7 +803,7 @@ void main() {
           expect(e, isA<ArgumentError>());
         }
       });
-      test('sendOrder query parameters test', () {
+      test('sendOrder query parameters may be overriden', () {
         final queryParams = _api.buildTradeOrderParams(
             'test',
             Side.buy,
@@ -818,6 +818,21 @@ void main() {
             0.1, // non-null icebergQty
             null);
         expect(queryParams, containsPair('timeInForce', TimeInForce.gtc.value));
+      });
+      test('sendOrder dryRun test', () async {
+        _api.dispose();
+        _api.apiClient = testTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        const symbol = 'BNBETH';
+        final testOrderResponse = await _api.sendOrder(
+          symbol: symbol,
+          quantity: 1,
+          price: 0.5,
+          dryRun: true,
+        );
+        expect(testOrderResponse, isA<BinanceTradeResponse>());
+        expect(testOrderResponse, equals(BinanceTradeResponse.dry(symbol)));
       });
       test('KO sendOrder should throw', () async {
         _api.dispose();
