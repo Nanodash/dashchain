@@ -24,6 +24,7 @@ class _$BinanceOrderStatusTearOff {
 
   _BinanceOrderStatus call(
       String symbol,
+      String? origClientOrderId,
       int orderId,
       int orderListId,
       String clientOrderId,
@@ -35,14 +36,15 @@ class _$BinanceOrderStatusTearOff {
       String timeInForce,
       String type,
       String side,
-      String stopPrice,
-      String icebergQty,
-      int time,
-      int updateTime,
-      bool isWorking,
-      String origQuoteOrderQty) {
+      String? stopPrice,
+      String? icebergQty,
+      int? time,
+      int? updateTime,
+      bool? isWorking,
+      String? origQuoteOrderQty) {
     return _BinanceOrderStatus(
       symbol,
+      origClientOrderId,
       orderId,
       orderListId,
       clientOrderId,
@@ -74,6 +76,7 @@ const $BinanceOrderStatus = _$BinanceOrderStatusTearOff();
 /// @nodoc
 mixin _$BinanceOrderStatus {
   String get symbol => throw _privateConstructorUsedError;
+  String? get origClientOrderId => throw _privateConstructorUsedError;
   int get orderId => throw _privateConstructorUsedError;
   int get orderListId => throw _privateConstructorUsedError;
   String get clientOrderId => throw _privateConstructorUsedError;
@@ -85,12 +88,12 @@ mixin _$BinanceOrderStatus {
   String get timeInForce => throw _privateConstructorUsedError;
   String get type => throw _privateConstructorUsedError;
   String get side => throw _privateConstructorUsedError;
-  String get stopPrice => throw _privateConstructorUsedError;
-  String get icebergQty => throw _privateConstructorUsedError;
-  int get time => throw _privateConstructorUsedError;
-  int get updateTime => throw _privateConstructorUsedError;
-  bool get isWorking => throw _privateConstructorUsedError;
-  String get origQuoteOrderQty => throw _privateConstructorUsedError;
+  String? get stopPrice => throw _privateConstructorUsedError;
+  String? get icebergQty => throw _privateConstructorUsedError;
+  int? get time => throw _privateConstructorUsedError;
+  int? get updateTime => throw _privateConstructorUsedError;
+  bool? get isWorking => throw _privateConstructorUsedError;
+  String? get origQuoteOrderQty => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -105,6 +108,7 @@ abstract class $BinanceOrderStatusCopyWith<$Res> {
       _$BinanceOrderStatusCopyWithImpl<$Res>;
   $Res call(
       {String symbol,
+      String? origClientOrderId,
       int orderId,
       int orderListId,
       String clientOrderId,
@@ -116,12 +120,12 @@ abstract class $BinanceOrderStatusCopyWith<$Res> {
       String timeInForce,
       String type,
       String side,
-      String stopPrice,
-      String icebergQty,
-      int time,
-      int updateTime,
-      bool isWorking,
-      String origQuoteOrderQty});
+      String? stopPrice,
+      String? icebergQty,
+      int? time,
+      int? updateTime,
+      bool? isWorking,
+      String? origQuoteOrderQty});
 }
 
 /// @nodoc
@@ -136,6 +140,7 @@ class _$BinanceOrderStatusCopyWithImpl<$Res>
   @override
   $Res call({
     Object? symbol = freezed,
+    Object? origClientOrderId = freezed,
     Object? orderId = freezed,
     Object? orderListId = freezed,
     Object? clientOrderId = freezed,
@@ -159,6 +164,10 @@ class _$BinanceOrderStatusCopyWithImpl<$Res>
           ? _value.symbol
           : symbol // ignore: cast_nullable_to_non_nullable
               as String,
+      origClientOrderId: origClientOrderId == freezed
+          ? _value.origClientOrderId
+          : origClientOrderId // ignore: cast_nullable_to_non_nullable
+              as String?,
       orderId: orderId == freezed
           ? _value.orderId
           : orderId // ignore: cast_nullable_to_non_nullable
@@ -206,27 +215,27 @@ class _$BinanceOrderStatusCopyWithImpl<$Res>
       stopPrice: stopPrice == freezed
           ? _value.stopPrice
           : stopPrice // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       icebergQty: icebergQty == freezed
           ? _value.icebergQty
           : icebergQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       time: time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       updateTime: updateTime == freezed
           ? _value.updateTime
           : updateTime // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       isWorking: isWorking == freezed
           ? _value.isWorking
           : isWorking // ignore: cast_nullable_to_non_nullable
-              as bool,
+              as bool?,
       origQuoteOrderQty: origQuoteOrderQty == freezed
           ? _value.origQuoteOrderQty
           : origQuoteOrderQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
     ));
   }
 }
@@ -240,6 +249,7 @@ abstract class _$BinanceOrderStatusCopyWith<$Res>
   @override
   $Res call(
       {String symbol,
+      String? origClientOrderId,
       int orderId,
       int orderListId,
       String clientOrderId,
@@ -251,12 +261,12 @@ abstract class _$BinanceOrderStatusCopyWith<$Res>
       String timeInForce,
       String type,
       String side,
-      String stopPrice,
-      String icebergQty,
-      int time,
-      int updateTime,
-      bool isWorking,
-      String origQuoteOrderQty});
+      String? stopPrice,
+      String? icebergQty,
+      int? time,
+      int? updateTime,
+      bool? isWorking,
+      String? origQuoteOrderQty});
 }
 
 /// @nodoc
@@ -273,6 +283,7 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
   @override
   $Res call({
     Object? symbol = freezed,
+    Object? origClientOrderId = freezed,
     Object? orderId = freezed,
     Object? orderListId = freezed,
     Object? clientOrderId = freezed,
@@ -296,6 +307,10 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
           ? _value.symbol
           : symbol // ignore: cast_nullable_to_non_nullable
               as String,
+      origClientOrderId == freezed
+          ? _value.origClientOrderId
+          : origClientOrderId // ignore: cast_nullable_to_non_nullable
+              as String?,
       orderId == freezed
           ? _value.orderId
           : orderId // ignore: cast_nullable_to_non_nullable
@@ -343,27 +358,27 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
       stopPrice == freezed
           ? _value.stopPrice
           : stopPrice // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       icebergQty == freezed
           ? _value.icebergQty
           : icebergQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       time == freezed
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       updateTime == freezed
           ? _value.updateTime
           : updateTime // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       isWorking == freezed
           ? _value.isWorking
           : isWorking // ignore: cast_nullable_to_non_nullable
-              as bool,
+              as bool?,
       origQuoteOrderQty == freezed
           ? _value.origQuoteOrderQty
           : origQuoteOrderQty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
     ));
   }
 }
@@ -373,6 +388,7 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
 class _$_BinanceOrderStatus implements _BinanceOrderStatus {
   _$_BinanceOrderStatus(
       this.symbol,
+      this.origClientOrderId,
       this.orderId,
       this.orderListId,
       this.clientOrderId,
@@ -397,6 +413,8 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
   @override
   final String symbol;
   @override
+  final String? origClientOrderId;
+  @override
   final int orderId;
   @override
   final int orderListId;
@@ -419,21 +437,21 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
   @override
   final String side;
   @override
-  final String stopPrice;
+  final String? stopPrice;
   @override
-  final String icebergQty;
+  final String? icebergQty;
   @override
-  final int time;
+  final int? time;
   @override
-  final int updateTime;
+  final int? updateTime;
   @override
-  final bool isWorking;
+  final bool? isWorking;
   @override
-  final String origQuoteOrderQty;
+  final String? origQuoteOrderQty;
 
   @override
   String toString() {
-    return 'BinanceOrderStatus(symbol: $symbol, orderId: $orderId, orderListId: $orderListId, clientOrderId: $clientOrderId, price: $price, origQty: $origQty, executedQty: $executedQty, cummulativeQuoteQty: $cummulativeQuoteQty, status: $status, timeInForce: $timeInForce, type: $type, side: $side, stopPrice: $stopPrice, icebergQty: $icebergQty, time: $time, updateTime: $updateTime, isWorking: $isWorking, origQuoteOrderQty: $origQuoteOrderQty)';
+    return 'BinanceOrderStatus(symbol: $symbol, origClientOrderId: $origClientOrderId, orderId: $orderId, orderListId: $orderListId, clientOrderId: $clientOrderId, price: $price, origQty: $origQty, executedQty: $executedQty, cummulativeQuoteQty: $cummulativeQuoteQty, status: $status, timeInForce: $timeInForce, type: $type, side: $side, stopPrice: $stopPrice, icebergQty: $icebergQty, time: $time, updateTime: $updateTime, isWorking: $isWorking, origQuoteOrderQty: $origQuoteOrderQty)';
   }
 
   @override
@@ -442,6 +460,8 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
         (other.runtimeType == runtimeType &&
             other is _BinanceOrderStatus &&
             const DeepCollectionEquality().equals(other.symbol, symbol) &&
+            const DeepCollectionEquality()
+                .equals(other.origClientOrderId, origClientOrderId) &&
             const DeepCollectionEquality().equals(other.orderId, orderId) &&
             const DeepCollectionEquality()
                 .equals(other.orderListId, orderListId) &&
@@ -470,26 +490,28 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(symbol),
-      const DeepCollectionEquality().hash(orderId),
-      const DeepCollectionEquality().hash(orderListId),
-      const DeepCollectionEquality().hash(clientOrderId),
-      const DeepCollectionEquality().hash(price),
-      const DeepCollectionEquality().hash(origQty),
-      const DeepCollectionEquality().hash(executedQty),
-      const DeepCollectionEquality().hash(cummulativeQuoteQty),
-      const DeepCollectionEquality().hash(status),
-      const DeepCollectionEquality().hash(timeInForce),
-      const DeepCollectionEquality().hash(type),
-      const DeepCollectionEquality().hash(side),
-      const DeepCollectionEquality().hash(stopPrice),
-      const DeepCollectionEquality().hash(icebergQty),
-      const DeepCollectionEquality().hash(time),
-      const DeepCollectionEquality().hash(updateTime),
-      const DeepCollectionEquality().hash(isWorking),
-      const DeepCollectionEquality().hash(origQuoteOrderQty));
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        const DeepCollectionEquality().hash(symbol),
+        const DeepCollectionEquality().hash(origClientOrderId),
+        const DeepCollectionEquality().hash(orderId),
+        const DeepCollectionEquality().hash(orderListId),
+        const DeepCollectionEquality().hash(clientOrderId),
+        const DeepCollectionEquality().hash(price),
+        const DeepCollectionEquality().hash(origQty),
+        const DeepCollectionEquality().hash(executedQty),
+        const DeepCollectionEquality().hash(cummulativeQuoteQty),
+        const DeepCollectionEquality().hash(status),
+        const DeepCollectionEquality().hash(timeInForce),
+        const DeepCollectionEquality().hash(type),
+        const DeepCollectionEquality().hash(side),
+        const DeepCollectionEquality().hash(stopPrice),
+        const DeepCollectionEquality().hash(icebergQty),
+        const DeepCollectionEquality().hash(time),
+        const DeepCollectionEquality().hash(updateTime),
+        const DeepCollectionEquality().hash(isWorking),
+        const DeepCollectionEquality().hash(origQuoteOrderQty)
+      ]);
 
   @JsonKey(ignore: true)
   @override
@@ -505,6 +527,7 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
 abstract class _BinanceOrderStatus implements BinanceOrderStatus {
   factory _BinanceOrderStatus(
       String symbol,
+      String? origClientOrderId,
       int orderId,
       int orderListId,
       String clientOrderId,
@@ -516,18 +539,20 @@ abstract class _BinanceOrderStatus implements BinanceOrderStatus {
       String timeInForce,
       String type,
       String side,
-      String stopPrice,
-      String icebergQty,
-      int time,
-      int updateTime,
-      bool isWorking,
-      String origQuoteOrderQty) = _$_BinanceOrderStatus;
+      String? stopPrice,
+      String? icebergQty,
+      int? time,
+      int? updateTime,
+      bool? isWorking,
+      String? origQuoteOrderQty) = _$_BinanceOrderStatus;
 
   factory _BinanceOrderStatus.fromJson(Map<String, dynamic> json) =
       _$_BinanceOrderStatus.fromJson;
 
   @override
   String get symbol;
+  @override
+  String? get origClientOrderId;
   @override
   int get orderId;
   @override
@@ -551,17 +576,17 @@ abstract class _BinanceOrderStatus implements BinanceOrderStatus {
   @override
   String get side;
   @override
-  String get stopPrice;
+  String? get stopPrice;
   @override
-  String get icebergQty;
+  String? get icebergQty;
   @override
-  int get time;
+  int? get time;
   @override
-  int get updateTime;
+  int? get updateTime;
   @override
-  bool get isWorking;
+  bool? get isWorking;
   @override
-  String get origQuoteOrderQty;
+  String? get origQuoteOrderQty;
   @override
   @JsonKey(ignore: true)
   _$BinanceOrderStatusCopyWith<_BinanceOrderStatus> get copyWith =>

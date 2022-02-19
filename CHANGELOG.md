@@ -1,6 +1,6 @@
 ## 0.10.0
 
-- integrate `GET` method for the `/order` endpoint
+- integrate `GET` and `DELETE` methods for the `/order` endpoint
 
 ## 0.9.0
 

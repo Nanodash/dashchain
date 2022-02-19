@@ -10,6 +10,7 @@ _$_BinanceOrderStatus _$$_BinanceOrderStatusFromJson(
         Map<String, dynamic> json) =>
     _$_BinanceOrderStatus(
       json['symbol'] as String,
+      json['origClientOrderId'] as String?,
       json['orderId'] as int,
       json['orderListId'] as int,
       json['clientOrderId'] as String,
@@ -21,18 +22,19 @@ _$_BinanceOrderStatus _$$_BinanceOrderStatusFromJson(
       json['timeInForce'] as String,
       json['type'] as String,
       json['side'] as String,
-      json['stopPrice'] as String,
-      json['icebergQty'] as String,
-      json['time'] as int,
-      json['updateTime'] as int,
-      json['isWorking'] as bool,
-      json['origQuoteOrderQty'] as String,
+      json['stopPrice'] as String?,
+      json['icebergQty'] as String?,
+      json['time'] as int?,
+      json['updateTime'] as int?,
+      json['isWorking'] as bool?,
+      json['origQuoteOrderQty'] as String?,
     );
 
 Map<String, dynamic> _$$_BinanceOrderStatusToJson(
         _$_BinanceOrderStatus instance) =>
     <String, dynamic>{
       'symbol': instance.symbol,
+      'origClientOrderId': instance.origClientOrderId,
       'orderId': instance.orderId,
       'orderListId': instance.orderListId,
       'clientOrderId': instance.clientOrderId,
