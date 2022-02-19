@@ -75,7 +75,40 @@ late final MockClient timeOkClient = MockClient(
 late final MockClient exchangeInfoOkClient = MockClient(
   (Request request) => Future.value(
     Response(
-      jsonEncode(BinanceExchangeInfo('test', -1, [], [], [])),
+      jsonEncode(BinanceExchangeInfo('test', -1, [
+        BinanceRateLimiter.fromJson({
+          'rateLimitType': 'test',
+          'interval': Interval.d1.value,
+          'intervalNum': -1,
+          'limit': -1,
+        }),
+      ], [
+        BinanceExchangeFilter.fromJson({
+          'filterType': 'test',
+          'maxNumAlgoOrders': -1,
+        }),
+      ], [
+        BinanceSymbol(
+          'test',
+          BinanceTradingStatus
+              .auctionMatch.value, // last enum value for coverage
+          'test',
+          6,
+          'test',
+          6,
+          6,
+          6,
+          6,
+          [],
+          false,
+          false,
+          false,
+          false,
+          false,
+          [],
+          [],
+        ),
+      ])),
       200,
       reasonPhrase: 'exchangeInfoOkClient',
     ),

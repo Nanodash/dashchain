@@ -1,6 +1,7 @@
 ## 0.10.0
 
-- integrate `GET` and `DELETE` methods for the `/order` endpoint
+- integrate `GET` and `DELETE` methods for the `/order` endpoint and add possibility to do a dry run for the `POST` method using `/order/test` endpoint
+- add badges on README.md
 
 ## 0.9.0
 

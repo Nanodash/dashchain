@@ -5,6 +5,24 @@ import 'mock_clients.dart';
 
 // ignore_for_file: avoid_print
 void main() {
+  group('common API', () {
+    test('double.toPrecision test', () {
+      var testDouble = 0.12300456789;
+      var roundedDouble = 0.123;
+      expect(testDouble.toPrecision(3), equals(roundedDouble));
+      roundedDouble += 0.000005;
+      expect(testDouble.toPrecision(6), equals(roundedDouble));
+      testDouble += 0.0004;
+      roundedDouble -= 0.000005;
+      expect(testDouble.toPrecision(3), equals(roundedDouble));
+      testDouble += 0.0001;
+      roundedDouble += 0.001;
+      expect(testDouble.toPrecision(3), equals(roundedDouble));
+      testDouble += 6;
+      roundedDouble += 6;
+      expect(testDouble.toPrecision(3), equals(roundedDouble));
+    });
+  });
   group('Binance REST API', () {
     // the class to be tested
     late final BinanceRestApi _api;
@@ -353,12 +371,32 @@ void main() {
         final klines =
             await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
         expect(klines, isA<List<BinanceKline>>());
+        for (final kline in klines) {
+          final clone = BinanceKline(
+            kline.openTime,
+            kline.openPrice,
+            kline.highPrice,
+            kline.lowPrice,
+            kline.closePrice,
+            kline.volume,
+            kline.closeTime,
+            kline.quoteAssetVolume,
+            kline.trades,
+            kline.takerBuyBaseAssetVolume,
+            kline.takerBuyQuoteAssetVolume,
+            kline.ignore,
+          );
+          print(kline);
+          print(clone);
+          expect(kline, equals(clone));
+          expect(kline.hashCode, equals(clone.hashCode));
+        }
       });
       test('bad format klines should throw', () async {
         _api.dispose();
         _api.apiClient = notAListClient;
         try {
-          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
+          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d3);
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
@@ -367,7 +405,7 @@ void main() {
         _api.dispose();
         _api.apiClient = klinesKoClient;
         try {
-          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
+          await _api.candlestick(symbol: 'BNBETH', interval: Interval.h8);
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
@@ -384,7 +422,7 @@ void main() {
         try {
           await _api.candlestick(
             symbol: 'BNBETH',
-            interval: Interval.d1,
+            interval: Interval.w1,
             startTime: start,
             endtime: end,
           );
@@ -398,7 +436,10 @@ void main() {
         _api.dispose();
         _api.apiClient = koClient;
         try {
-          await _api.candlestick(symbol: 'BNBETH', interval: Interval.d1);
+          await _api.candlestick(
+            symbol: 'BNBETH',
+            interval: Interval.w4, // last enum value for coverage
+          );
           fail('should have thrown a BinanceApiError');
         } catch (e) {
           print(e);
@@ -830,7 +871,7 @@ void main() {
       test('sendOrder query parameters test', () {
         final queryParams = _api.buildTradeOrderParams(
             'test',
-            Side.buy,
+            Side.sell,
             OrderType.limit,
             1,
             0,
