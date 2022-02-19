@@ -455,6 +455,8 @@ void main() {
         _api.apiClient = avgPriceOkClient;
         final avgPrice = await _api.averagePrice(symbol: 'BNBETH');
         expect(avgPrice, isA<BinanceAveragePrice>());
+        expect(
+            BinanceAveragePrice.fromJson(avgPrice.toJson()), equals(avgPrice));
       });
       test('KO avgPrice should throw', () async {
         _api.dispose();
@@ -478,6 +480,8 @@ void main() {
         final dayTicker = await _api.dayTicker(symbol: 'BNBETH');
         expect(dayTicker, isA<List<BinanceDayTicker>>());
         expect(dayTicker.length, equals(1));
+        expect(BinanceDayTicker.fromJson(dayTicker.first.toJson()),
+            equals(dayTicker.first));
         // don't select symbol, more than 1 entry in the list
         _api.dispose();
         _api.apiClient = dayTickerOkClient2;
@@ -529,6 +533,8 @@ void main() {
         final priceTicker = await _api.priceTicker(symbol: 'BNBETH');
         expect(priceTicker, isA<List<BinancePriceTicker>>());
         expect(priceTicker.length, equals(1));
+        expect(BinancePriceTicker.fromJson(priceTicker.first.toJson()),
+            equals(priceTicker.first));
         // don't select symbol, more than 1 entry in the list
         _api.dispose();
         _api.apiClient = priceTickerOkClient2;
@@ -580,6 +586,8 @@ void main() {
         final bookTicker = await _api.bookTicker(symbol: 'BNBETH');
         expect(bookTicker, isA<List<BinanceBookTicker>>());
         expect(bookTicker.length, equals(1));
+        expect(BinanceBookTicker.fromJson(bookTicker.first.toJson()),
+            equals(bookTicker.first));
         // don't select symbol, more than 1 entry in the list
         _api.dispose();
         _api.apiClient = bookTickerOkClient2;
@@ -898,6 +906,8 @@ void main() {
         );
         expect(testOrderResponse, isA<BinanceTradeResponse>());
         expect(testOrderResponse, equals(BinanceTradeResponse.dry(symbol)));
+        expect(BinanceTradeResponse.fromJson(testOrderResponse.toJson()),
+            equals(testOrderResponse));
       });
       test('KO sendOrder should throw', () async {
         _api.dispose();
@@ -925,6 +935,8 @@ void main() {
             await _api.getOrderStatus(symbol: 'BNBETH', orderId: 1);
         expect(orderStatus, isA<BinanceOrderStatus>());
         expect(orderStatus.orderId, equals(1));
+        expect(BinanceOrderStatus.fromJson(orderStatus.toJson()),
+            equals(orderStatus));
       });
       test('either orderId or origClientOrderId must be sent', () async {
         _api.dispose();

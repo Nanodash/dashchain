@@ -488,41 +488,41 @@ late final MockClient tradeOrderOkClient = MockClient(
             "type": "MARKET",
             "side": "SELL",
             "fills": [
-              {
-                "price": "4000.00000000",
-                "qty": "1.00000000",
-                "commission": "4.00000000",
-                "commissionAsset": "USDT",
-                "tradeId": 56
-              },
-              {
-                "price": "3999.00000000",
-                "qty": "5.00000000",
-                "commission": "19.99500000",
-                "commissionAsset": "USDT",
-                "tradeId": 57
-              },
-              {
-                "price": "3998.00000000",
-                "qty": "2.00000000",
-                "commission": "7.99600000",
-                "commissionAsset": "USDT",
-                "tradeId": 58
-              },
-              {
-                "price": "3997.00000000",
-                "qty": "1.00000000",
-                "commission": "3.99700000",
-                "commissionAsset": "USDT",
-                "tradeId": 59
-              },
-              {
-                "price": "3995.00000000",
-                "qty": "1.00000000",
-                "commission": "3.99500000",
-                "commissionAsset": "USDT",
-                "tradeId": 60
-              }
+              BinanceOrderFill(
+                "4000.00000000",
+                "1.00000000",
+                "4.00000000",
+                "USDT",
+                56,
+              ).toJson(),
+              BinanceOrderFill(
+                "3999.00000000",
+                "5.00000000",
+                "19.99500000",
+                "USDT",
+                57,
+              ).toJson(),
+              BinanceOrderFill(
+                "3998.00000000",
+                "2.00000000",
+                "7.99600000",
+                "USDT",
+                58,
+              ).toJson(),
+              BinanceOrderFill(
+                "3997.00000000",
+                "1.00000000",
+                "3.99700000",
+                "USDT",
+                59,
+              ).toJson(),
+              BinanceOrderFill(
+                "3995.00000000",
+                "1.00000000",
+                "3.99500000",
+                "USDT",
+                60,
+              ).toJson()
             ]
           };
           mockResponse = Response(
