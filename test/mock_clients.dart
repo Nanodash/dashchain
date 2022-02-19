@@ -510,3 +510,11 @@ late final MockClient tradeOrderOkClient = MockClient(
     return Future.value(mockResponse);
   },
 );
+
+late final MockClient testTradeOrderOkClient = MockClient(
+  (Request request) => Future.value(Response(
+    jsonEncode({}),
+    200,
+    reasonPhrase: 'testTradeOrderOkClient',
+  )),
+);

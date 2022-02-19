@@ -26,4 +26,21 @@ class BinanceTradeResponse with _$BinanceTradeResponse {
 
   factory BinanceTradeResponse.fromJson(Map<String, dynamic> json) =>
       _$BinanceTradeResponseFromJson(json);
+
+  factory BinanceTradeResponse.dry(String symbol) => BinanceTradeResponse(
+        symbol,
+        -1,
+        -1,
+        'testOrder',
+        -1,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
 }
