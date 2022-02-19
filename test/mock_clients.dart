@@ -518,3 +518,30 @@ late final MockClient testTradeOrderOkClient = MockClient(
     reasonPhrase: 'testTradeOrderOkClient',
   )),
 );
+
+late final MockClient getTradeOrderOkClient = MockClient(
+  (Request request) => Future.value(Response(
+    jsonEncode({
+      "symbol": "LTCBTC",
+      "orderId": 1,
+      "orderListId": -1, //Unless part of an OCO, the value will always be -1.
+      "clientOrderId": "myOrder1",
+      "price": "0.1",
+      "origQty": "1.0",
+      "executedQty": "0.0",
+      "cummulativeQuoteQty": "0.0",
+      "status": "NEW",
+      "timeInForce": "GTC",
+      "type": "LIMIT",
+      "side": "BUY",
+      "stopPrice": "0.0",
+      "icebergQty": "0.0",
+      "time": 1499827319559,
+      "updateTime": 1499827319559,
+      "isWorking": true,
+      "origQuoteOrderQty": "0.000000"
+    }),
+    200,
+    reasonPhrase: 'getTradeOrderOkClient',
+  )),
+);

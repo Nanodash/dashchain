@@ -626,6 +626,7 @@ class BinanceRestApi {
   ///   - validate that you are using the right set of parameters (if invalid: client throws `ArgumentError`, server may throw `BinanceApiError(400, Bad Request)`)
   ///
   /// Other info from docs :
+  ///
   /// _Any `LIMIT` or `LIMIT_MAKER` type order can be made an iceberg order by sending an `icebergQty`.
   /// Any order with an `icebergQty` **MUST** have `timeInForce` set to `GTC`. (it is done by library)
   /// `MARKET` orders using `quoteOrderQty` will not break `LOT_SIZE` filter rules; the order will execute a quantity that will have the notional value as close as possible to `quoteOrderQty`. Trigger order price rules against market price for both `MARKET` and `LIMIT` versions:
@@ -800,5 +801,47 @@ class BinanceRestApi {
       queryParameters['newOrderRespType'] = newOrderRespType.value;
     }
     return queryParameters;
+  }
+
+  /// Will query the status of a given order.
+  ///
+  /// API Key required : yes (+ signature)
+  ///
+  /// Query weight : 2
+  ///
+  /// Returns a [BinanceOrderStatus] containing all returned data when request is a success.
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  ///
+  /// Other info from docs:
+  ///
+  /// - Either orderId or origClientOrderId must be sent.
+  /// - For some historical orders cummulativeQuoteQty will be < 0, meaning the data is not available at this time.
+  Future<dynamic> getOrderStatus({
+    String baseUri = defaultUri,
+    required String symbol,
+    int? orderId,
+    String? origClientOrderId,
+    int recvWindow = 5000,
+  }) {
+    if (null == orderId && null == origClientOrderId) {
+      throw ArgumentError('Either orderId or origClientOrderId must be sent.');
+    }
+    final queryParameters = {
+      'symbol': symbol,
+      'recvWindow': '$recvWindow',
+    };
+    if (null != orderId) {
+      queryParameters['orderId'] = '$orderId';
+    }
+    if (null != origClientOrderId) {
+      queryParameters['origClientOrderId'] = origClientOrderId;
+    }
+    return sendRequest(
+      baseUri,
+      tradeOrderPath,
+      queryParameters: queryParameters,
+      withSignature: true,
+    );
   }
 }
