@@ -1,3 +1,7 @@
+## 0.10.0
+
+- integrate `GET` method for the `/order` endpoint
+
 ## 0.9.0
 
 - integrate `/order` endpoint
