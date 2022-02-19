@@ -1035,5 +1035,95 @@ void main() {
         }
       });
     });
+    group('OCO order tests', () {
+      test('OK sendOcoOrder should return BinanceOrderStatus object', () async {
+        _api.dispose();
+        _api.apiClient = ocoTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        final orderResponse = await _api.sendOcoOrder(
+          symbol: 'BNBETH',
+          quantity: 1,
+          price: 0.5,
+          stopPrice: 0.45,
+        );
+        expect(orderResponse, isA<BinanceOrderStatus>());
+      });
+      test('sendOcoOrder may have additional required parameters', () async {
+        _api.dispose();
+        _api.apiClient = ocoTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        // OCO with STOP_LIMIT order needs stopLimitTimeInForce param
+        try {
+          // missing stopLimitTimeInForce
+          await _api.sendOcoOrder(
+            symbol: 'BNBETH',
+            quantity: 1,
+            price: 0.5,
+            stopPrice: 0.45,
+            stopLimitPrice: 0.47,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+      });
+      test('sendOcoOrder recvWindow should be <=60000', () async {
+        _api.dispose();
+        _api.apiClient = ocoTradeOrderOkClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          // negative recvWindow
+          await _api.sendOcoOrder(
+            symbol: 'BNBETH',
+            quantity: 1,
+            price: 0.5,
+            stopPrice: 0.45,
+            recvWindow: -1,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+        try {
+          // recvWindow too high
+          await _api.sendOcoOrder(
+            symbol: 'BNBETH',
+            quantity: 1,
+            price: 0.5,
+            stopPrice: 0.45,
+            recvWindow: 60001,
+          );
+          fail('should have thrown a ArgumentError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<ArgumentError>());
+        }
+      });
+      test('KO sendOcoOrder should throw', () async {
+        _api.dispose();
+        _api.apiClient = koClient;
+        _api.apiKey = 'apiKey';
+        _api.apiSecretKey = 'apiSecretKey';
+        try {
+          await _api.sendOcoOrder(
+            symbol: 'BNBETH',
+            quantity: 1,
+            price: 0.5,
+            stopPrice: 0.45,
+          );
+          fail('should have thrown a BinanceApiError');
+        } catch (e) {
+          print(e);
+          expect(e, isA<BinanceApiError>());
+          final _e = e as BinanceApiError;
+          expect(_e.errorCode, equals(400));
+        }
+      });
+    });
   });
 }

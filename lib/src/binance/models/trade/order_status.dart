@@ -9,9 +9,9 @@ class BinanceOrderStatus with _$BinanceOrderStatus {
   factory BinanceOrderStatus(
     String symbol,
     String? origClientOrderId,
-    int orderId,
-    int orderListId,
-    String clientOrderId,
+    int? orderId,
+    int? orderListId,
+    String? clientOrderId,
     int? transactTime,
     String? price,
     String? origQty,

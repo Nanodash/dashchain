@@ -25,9 +25,9 @@ class _$BinanceOrderStatusTearOff {
   _BinanceOrderStatus call(
       String symbol,
       String? origClientOrderId,
-      int orderId,
-      int orderListId,
-      String clientOrderId,
+      int? orderId,
+      int? orderListId,
+      String? clientOrderId,
       int? transactTime,
       String? price,
       String? origQty,
@@ -81,9 +81,9 @@ const $BinanceOrderStatus = _$BinanceOrderStatusTearOff();
 mixin _$BinanceOrderStatus {
   String get symbol => throw _privateConstructorUsedError;
   String? get origClientOrderId => throw _privateConstructorUsedError;
-  int get orderId => throw _privateConstructorUsedError;
-  int get orderListId => throw _privateConstructorUsedError;
-  String get clientOrderId => throw _privateConstructorUsedError;
+  int? get orderId => throw _privateConstructorUsedError;
+  int? get orderListId => throw _privateConstructorUsedError;
+  String? get clientOrderId => throw _privateConstructorUsedError;
   int? get transactTime => throw _privateConstructorUsedError;
   String? get price => throw _privateConstructorUsedError;
   String? get origQty => throw _privateConstructorUsedError;
@@ -115,9 +115,9 @@ abstract class $BinanceOrderStatusCopyWith<$Res> {
   $Res call(
       {String symbol,
       String? origClientOrderId,
-      int orderId,
-      int orderListId,
-      String clientOrderId,
+      int? orderId,
+      int? orderListId,
+      String? clientOrderId,
       int? transactTime,
       String? price,
       String? origQty,
@@ -181,15 +181,15 @@ class _$BinanceOrderStatusCopyWithImpl<$Res>
       orderId: orderId == freezed
           ? _value.orderId
           : orderId // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       orderListId: orderListId == freezed
           ? _value.orderListId
           : orderListId // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       clientOrderId: clientOrderId == freezed
           ? _value.clientOrderId
           : clientOrderId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       transactTime: transactTime == freezed
           ? _value.transactTime
           : transactTime // ignore: cast_nullable_to_non_nullable
@@ -268,9 +268,9 @@ abstract class _$BinanceOrderStatusCopyWith<$Res>
   $Res call(
       {String symbol,
       String? origClientOrderId,
-      int orderId,
-      int orderListId,
-      String clientOrderId,
+      int? orderId,
+      int? orderListId,
+      String? clientOrderId,
       int? transactTime,
       String? price,
       String? origQty,
@@ -336,15 +336,15 @@ class __$BinanceOrderStatusCopyWithImpl<$Res>
       orderId == freezed
           ? _value.orderId
           : orderId // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       orderListId == freezed
           ? _value.orderListId
           : orderListId // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       clientOrderId == freezed
           ? _value.clientOrderId
           : clientOrderId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       transactTime == freezed
           ? _value.transactTime
           : transactTime // ignore: cast_nullable_to_non_nullable
@@ -447,11 +447,11 @@ class _$_BinanceOrderStatus implements _BinanceOrderStatus {
   @override
   final String? origClientOrderId;
   @override
-  final int orderId;
+  final int? orderId;
   @override
-  final int orderListId;
+  final int? orderListId;
   @override
-  final String clientOrderId;
+  final String? clientOrderId;
   @override
   final int? transactTime;
   @override
@@ -569,9 +569,9 @@ abstract class _BinanceOrderStatus implements BinanceOrderStatus {
   factory _BinanceOrderStatus(
       String symbol,
       String? origClientOrderId,
-      int orderId,
-      int orderListId,
-      String clientOrderId,
+      int? orderId,
+      int? orderListId,
+      String? clientOrderId,
       int? transactTime,
       String? price,
       String? origQty,
@@ -597,11 +597,11 @@ abstract class _BinanceOrderStatus implements BinanceOrderStatus {
   @override
   String? get origClientOrderId;
   @override
-  int get orderId;
+  int? get orderId;
   @override
-  int get orderListId;
+  int? get orderListId;
   @override
-  String get clientOrderId;
+  String? get clientOrderId;
   @override
   int? get transactTime;
   @override

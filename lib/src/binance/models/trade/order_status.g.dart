@@ -12,9 +12,9 @@ _$_BinanceOrderStatus _$$_BinanceOrderStatusFromJson(
     _$_BinanceOrderStatus(
       json['symbol'] as String,
       json['origClientOrderId'] as String?,
-      json['orderId'] as int,
-      json['orderListId'] as int,
-      json['clientOrderId'] as String,
+      json['orderId'] as int?,
+      json['orderListId'] as int?,
+      json['clientOrderId'] as String?,
       json['transactTime'] as int?,
       json['price'] as String?,
       json['origQty'] as String?,
