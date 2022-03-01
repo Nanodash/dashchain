@@ -61,6 +61,9 @@ const String tradeOrderPath = '/order';
 
 /// The endpoint to send a **test** trade order.
 const String testTradeOrderPath = '/order/test';
+
+/// The endpoint to send an OCO trade order.
+const String ocoTradeOrderPath = '/order/oco';
 // -----------------------------------
 
 // -------------- MISC. --------------

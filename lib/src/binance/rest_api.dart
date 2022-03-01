@@ -69,7 +69,7 @@ class BinanceRestApi {
     String baseUri,
     String resourcePath, {
     RequestMethod requestMethod = RequestMethod.get,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     bool withKey = false,
     bool withSignature = false,
   }) async {
@@ -85,7 +85,7 @@ class BinanceRestApi {
       if (null == apiSecretKey) {
         throw const BinanceApiError(-1, 'apiSecretKey must not be null');
       }
-      queryParameters ??= <String, dynamic>{};
+      queryParameters ??= <String, String>{};
       queryParameters['timestamp'] = '${DateTime.now().millisecondsSinceEpoch}';
       String totalParams = Uri.https('', '', queryParameters).query;
       queryParameters['signature'] = computeSignature(totalParams);
@@ -616,7 +616,7 @@ class BinanceRestApi {
   ///
   /// Query weight : 1
   ///
-  /// Returns a [BinanceTradeResponse] based on the given [OrderResponseType].
+  /// Returns a [BinanceOrderStatus] based on the given [OrderResponseType].
   ///
   /// Throws a [BinanceApiError] if an error occurs.
   ///
@@ -652,7 +652,7 @@ class BinanceRestApi {
   /// Serious trading is about timing. Networks can be unstable and unreliable, which can lead to requests taking varying amounts of time to reach the servers. With recvWindow, you can specify that the request must be processed within a certain number of milliseconds or be rejected by the server.
   ///
   /// It is recommended to use a small recvWindow of 5000 or less! The max cannot go beyond 60,000!
-  Future<BinanceTradeResponse> sendOrder({
+  Future<BinanceOrderStatus> sendOrder({
     String baseUri = defaultUri,
     required String symbol,
     Side side = Side.buy,
@@ -754,15 +754,15 @@ class BinanceRestApi {
       withSignature: true,
     );
     if (dryRun) {
-      // API response is empty Map, so here we just build an empty [BinanceTradeResponse]
-      return BinanceTradeResponse.dry(symbol);
+      // API response is empty Map, so here we just build an empty [BinanceOrderStatus]
+      return BinanceOrderStatus.dry(symbol);
     } else {
-      return BinanceTradeResponse.fromJson(result);
+      return BinanceOrderStatus.fromJson(result);
     }
   }
 
   @visibleForTesting
-  Map<String, dynamic> buildTradeOrderParams(
+  Map<String, String> buildTradeOrderParams(
     String symbol,
     Side side,
     OrderType type,
@@ -776,7 +776,7 @@ class BinanceRestApi {
     double? icebergQty,
     OrderResponseType? newOrderRespType,
   ) {
-    final queryParameters = <String, dynamic>{
+    final queryParameters = <String, String>{
       'symbol': symbol,
       'side': side.value,
       'type': type.value,
@@ -894,5 +894,152 @@ class BinanceRestApi {
       requestMethod: RequestMethod.delete,
       withSignature: true,
     ));
+  }
+
+  /// Will send an OCO trade order.
+  ///
+  /// API Key required : yes (+ signature)
+  ///
+  /// Query weight : 1
+  ///
+  /// Returns a [BinanceOrderStatus] based on the given [OrderResponseType].
+  ///
+  /// Throws a [BinanceApiError] if an error occurs.
+  ///
+  /// From Binance website : (https://academy.binance.com/en/articles/what-is-an-oco-order)
+  ///
+  /// _An OCO, or “One Cancels the Other” order allows you to place two orders at the same time.
+  /// It combines a limit order, with a stop-limit order, but only one of the two can be executed._
+  ///
+  ///
+  /// Other info from docs :
+  ///
+  /// _Price Restrictions:_
+  ///  - _SELL: Limit Price > Last Price > Stop Price_
+  ///  - _BUY: Limit Price < Last Price < Stop Price_
+  ///
+  /// _Quantity Restrictions:_
+  ///  - _Both legs must have the same quantity._
+  ///  - _ICEBERG quantities however do not have to be the same_
+  ///
+  /// _Order Rate Limit:_
+  ///  - OCO counts as 2 orders against the order rate limit._
+  Future<BinanceOrderStatus> sendOcoOrder({
+    String baseUri = defaultUri,
+    required String symbol,
+
+    /// A unique Id for the entire orderList
+    String? listClientOrderId,
+    Side side = Side.buy,
+    required double quantity,
+
+    /// A unique Id for the limit order
+    String? limitClientOrderId,
+    required double price,
+
+    /// Used to make the LIMIT_MAKER leg an iceberg order.
+    double? limitIcebergQty,
+
+    ///	A unique Id for the stop loss/stop loss limit leg
+    String? stopClientOrderId,
+    required double stopPrice,
+    double? stopLimitPrice,
+
+    /// Used with STOP_LOSS_LIMIT leg to make an iceberg order.
+    double? stopIcebergQty,
+    TimeInForce? stopLimitTimeInForce,
+
+    /// Set the response JSON. ACK, RESULT, or FULL; MARKET and LIMIT order types default to FULL, all other orders default to ACK.
+    OrderResponseType? newOrderRespType,
+
+    /// The value cannot be greater than 60000
+    int recvWindow = 5000,
+  }) async {
+    if (recvWindow < kMinRecvWindow || recvWindow > kMaxRecvWindow) {
+      throw RangeError(
+          'recvWindow should be a positive value less than $kMaxRecvWindow');
+    }
+    // additional mandatory parameters
+    if (null != stopLimitPrice && null == stopLimitTimeInForce) {
+      throw ArgumentError(
+          'stopLimitTimeInForce must not be null when stopLimitPrice is not null');
+    }
+    // build params
+    final queryParameters = _buildOcoTradeOrderParams(
+      symbol,
+      side,
+      quantity,
+      price,
+      stopPrice,
+      recvWindow,
+      listClientOrderId,
+      limitClientOrderId,
+      limitIcebergQty,
+      stopClientOrderId,
+      stopLimitPrice,
+      stopIcebergQty,
+      stopLimitTimeInForce,
+      newOrderRespType,
+    );
+    // send request
+    final result = await sendRequest(
+      baseUri,
+      ocoTradeOrderPath,
+      queryParameters: queryParameters,
+      requestMethod: RequestMethod.post,
+      withSignature: true,
+    );
+    return BinanceOrderStatus.fromJson(result);
+  }
+
+  Map<String, String> _buildOcoTradeOrderParams(
+    String symbol,
+    Side side,
+    double quantity,
+    double price,
+    double stopPrice,
+    int recvWindow,
+    String? listClientOrderId,
+    String? limitClientOrderId,
+    double? limitIcebergQty,
+    String? stopClientOrderId,
+    double? stopLimitPrice,
+    double? stopIcebergQty,
+    TimeInForce? stopLimitTimeInForce,
+    OrderResponseType? newOrderRespType,
+  ) {
+    final queryParameters = <String, String>{
+      'symbol': symbol,
+      'side': side.value,
+      'quantity': '$quantity',
+      'price': '$price',
+      'stopPrice': '$stopPrice',
+      'recvWindow': '$recvWindow',
+    };
+    if (null != listClientOrderId) {
+      queryParameters['listClientOrderId'] = listClientOrderId;
+    }
+    if (null != limitClientOrderId) {
+      queryParameters['limitClientOrderId'] = limitClientOrderId;
+    }
+    if (null != limitIcebergQty) {
+      queryParameters['limitIcebergQty'] = '$limitIcebergQty';
+    }
+    if (null != stopClientOrderId) {
+      queryParameters['stopClientOrderId'] = stopClientOrderId;
+    }
+    if (null != stopLimitPrice) {
+      queryParameters['stopLimitPrice'] = '$stopLimitPrice';
+    }
+    if (null != stopIcebergQty) {
+      queryParameters['stopIcebergQty'] = '$stopIcebergQty';
+    }
+    if (null != stopLimitTimeInForce) {
+      queryParameters['stopLimitTimeInForce'] = stopLimitTimeInForce.value;
+    }
+    if (null != newOrderRespType) {
+      queryParameters['newOrderRespType'] = newOrderRespType.value;
+    }
+    return queryParameters;
   }
 }

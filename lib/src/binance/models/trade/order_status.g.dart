@@ -1,4 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: non_constant_identifier_names
 
 part of 'order_status.dart';
 
@@ -11,19 +12,23 @@ _$_BinanceOrderStatus _$$_BinanceOrderStatusFromJson(
     _$_BinanceOrderStatus(
       json['symbol'] as String,
       json['origClientOrderId'] as String?,
-      json['orderId'] as int,
-      json['orderListId'] as int,
-      json['clientOrderId'] as String,
-      json['price'] as String,
-      json['origQty'] as String,
-      json['executedQty'] as String,
-      json['cummulativeQuoteQty'] as String,
-      json['status'] as String,
-      json['timeInForce'] as String,
-      json['type'] as String,
-      json['side'] as String,
+      json['orderId'] as int?,
+      json['orderListId'] as int?,
+      json['clientOrderId'] as String?,
+      json['transactTime'] as int?,
+      json['price'] as String?,
+      json['origQty'] as String?,
+      json['executedQty'] as String?,
+      json['cummulativeQuoteQty'] as String?,
+      json['status'] as String?,
+      json['timeInForce'] as String?,
+      json['type'] as String?,
+      json['side'] as String?,
       json['stopPrice'] as String?,
       json['icebergQty'] as String?,
+      (json['fills'] as List<dynamic>?)
+          ?.map((e) => BinanceOrderFill.fromJson(e as Map<String, dynamic>))
+          .toList(),
       json['time'] as int?,
       json['updateTime'] as int?,
       json['isWorking'] as bool?,
@@ -38,6 +43,7 @@ Map<String, dynamic> _$$_BinanceOrderStatusToJson(
       'orderId': instance.orderId,
       'orderListId': instance.orderListId,
       'clientOrderId': instance.clientOrderId,
+      'transactTime': instance.transactTime,
       'price': instance.price,
       'origQty': instance.origQty,
       'executedQty': instance.executedQty,
@@ -48,6 +54,7 @@ Map<String, dynamic> _$$_BinanceOrderStatusToJson(
       'side': instance.side,
       'stopPrice': instance.stopPrice,
       'icebergQty': instance.icebergQty,
+      'fills': instance.fills,
       'time': instance.time,
       'updateTime': instance.updateTime,
       'isWorking': instance.isWorking,

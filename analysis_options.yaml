@@ -6,7 +6,5 @@ linter:
     - unawaited_futures
 analyzer:
   exclude:
-    - "**/*.g.dart"
-    - "**/*.freezed.dart"
-  errors:
-    invalid_annotation_target: ignore
+    # - "**/*.g.dart"
+    # - "**/*.freezed.dart"
